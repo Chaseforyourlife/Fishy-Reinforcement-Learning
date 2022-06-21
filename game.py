@@ -8,8 +8,10 @@ fishy_right_image = pygame.image.load('static/images/fishy_right.png')
 screen = pygame.display.set_mode(window_size)
 
 class Fishy:
+  ##Init function
   def __init__(self):
-    self.width = 30
+    #positional variables
+    self.width = 38
     self.height = 8 
     self.x = 225
     self.y = 200
@@ -22,10 +24,12 @@ class Fishy:
     self.y_speed_change = .25
     self.image_left = pygame.transform.scale(fishy_left_image,(self.width,self.height)) 
     self.image_right = pygame.transform.scale(fishy_right_image,(self.width,self.height)) 
-
-
+    #stat variables
+    self.alive = True
+    self.fish_eaten = 0
+  ##Handle everything related to fishy moving
   def move(self):
-    print(self.x_speed)
+
     #check if fish is at top of bottom of screen before changing position
     if self.y <  0:
       self.y = 0
@@ -61,10 +65,66 @@ class Fishy:
       self.x_speed = 0 
     if abs(self.y_speed) < self.y_speed_change:
       self.y_speed = 0 
+  ##Draw fishy image to screen
   def draw(self,screen):
-    screen.blit(self.image_left if self.direction == 'L' else self.image_right,(self.x,self.y))
+    if self.alive:
+      screen.blit(self.image_left if self.direction == 'L' else self.image_right,(self.x,self.y))
+  ##Called on a schedule to check if fishy collides with any fish
+  def check_collide(self,school):
+
+    #if self.fish_eaten > 
+    
+    for fish in school.fish_list:
+      over = False
+      lined_up = False
+      #Right and Left collision 
+      if(self.x <= fish.x + fish.width and self.x + self.width >= fish.x):
+        over = True
+      #Top and bottom collision
+      if (self.y <= fish.y + fish.height and self.y + self.height >= fish.y):
+        lined_up = True 
+      print(over,lined_up)
+      if over and lined_up:
+        self.collide(fish)
+      
+  def collide(self,other_fish):
+    if self.fish_eaten > other_fish.fish_eaten:
+      other_fish.alive = False
+    else:
+      self.alive = False
+
+  
+
+class Fish():
+  ##Init function
+  def __init__(self):
+    #positional variables
+    self.width = 40
+    self.height = 8 
+    self.x = 40
+    self.y = 40
+    self.direction:char = 'R'
+    self.x_speed = 0
+    self.y_speed = 0
+    self.image_left = pygame.transform.scale(fishy_left_image,(self.width,self.height)) 
+    self.image_right = pygame.transform.scale(fishy_right_image,(self.width,self.height)) 
+    #stat variables
+    self.alive = True
+    self.fish_eaten = 0
+  
+  def draw(self,screen):
+    if self.alive:
+      screen.blit(self.image_left if self.direction == 'L' else self.image_right,(self.x,self.y))
 
 
+
+class School():
+  def __init__(self):
+    self.fish_list = [Fish()]
+  
+  def draw(self,screen):
+    for fish in self.fish_list:
+      fish.draw(screen)
 
 #use this for fish
 '''class Ship(pygame.sprite.Sprite):
@@ -79,33 +139,46 @@ ship = Ship("images\ship.png", [a, b])'''
 
 def main():
   fishy_background = pygame.image.load('static/images/fishy-background.png')
-  small_fish_image = pygame.image.load('static/images/fish.png')
   #screen.fill((255,255,255))
   
   #pygame.draw.rect(screen,(0,0,0),(225,200,40,20))
   clock = pygame.time.Clock()
 
-  main_fish = Fishy()
-
-
-
+  main_fishy = Fishy()
+  main_school = School()
+  
   running = True
   while running:
-    
+    #draw 
     screen.blit(fishy_background,(0,0))
-
-
-
-
     clock.tick(30)
-    main_fish.move()
-    main_fish.draw(screen)
+    ##Initialize game start
+    all_fish = []
+    ###MAIN GAME LOOP AFTER START
+    while main_fishy.alive == True:
+      clock.tick(30)
+      #draw background
+      screen.blit(fishy_background,(0,0))
+      #handle main_fishy movement
+      main_fishy.move()
+      #check if fishy collided with any fish in the main_school
+      main_fishy.check_collide(main_school)
+      #draw every fish in the main_school
+      main_school.draw(screen)
+      #draw fishy on the screen
+      main_fishy.draw(screen)
+      
+      #TESTING PURPOSES
+      main_fishy.fish_eaten = 1
 
-    pygame.display.update()
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        running = False
-        pygame.quit()
+
+      #update screen
+      pygame.display.update()
+      ##check if window gets closed
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          running = False
+          pygame.quit()
 
 
 
