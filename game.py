@@ -7,8 +7,8 @@ fishy_left_image = pygame.image.load('static/images/fishy_left.png')
 fishy_right_image = pygame.image.load('static/images/fishy_right.png')
 screen = pygame.display.set_mode(window_size)
 FPS = 30
-MAX_FISH = 4
-MAX_FISH_SPEED = 10
+MAX_FISH = 8
+MAX_FISH_SPEED = 8
 MIN_FISH_SPEED = 3
 
 class Fishy:
@@ -156,11 +156,11 @@ class School():
       #Generate fish
       width = 40
       height = 8
-      direction = 1 if random.randrange(0,1) else -1
-      x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
+      direction = 1 if random.randint(0,1) else -1
+      x_speed = random.randint(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
       
       x = -width if direction == 1 else window_size[0]
-      y = random.randrange(0,window_size[1]-height)
+      y = random.randint(0,window_size[1]-height)
 
       #TODO FIXME
       fish_eaten=0
