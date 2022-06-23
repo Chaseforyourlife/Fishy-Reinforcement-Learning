@@ -8,14 +8,14 @@ fishy_right_image = pygame.image.load('static/images/fishy_right.png')
 screen = pygame.display.set_mode(window_size)
 FPS = 30
 MAX_FISH = 8
-MAX_FISH_SPEED = 8
-MIN_FISH_SPEED = 3
+MAX_FISH_SPEED = 7
+MIN_FISH_SPEED = 2
 
 class Fishy:
   ##Init function
   def __init__(self):
     #positional variables
-    self.width = 38
+    self.width = 40
     self.height = 8 
     self.x = 225
     self.y = 200
@@ -31,9 +31,9 @@ class Fishy:
     #stat variables
     self.alive = True
     self.fish_eaten = 0
+
   ##Handle everything related to fishy moving
   def move(self):
-
     #check if fish is at top of bottom of screen before changing position
     if self.y <  0:
       self.y = 0
@@ -87,7 +87,6 @@ class Fishy:
       #Top and bottom collision
       if (self.y <= fish.y + fish.height and self.y + self.height >= fish.y):
         lined_up = True 
-      print(over,lined_up)
       if over and lined_up:
         self.collide(fish)
       
@@ -111,8 +110,8 @@ class Fish():
     self.direction = direction
     self.x_speed = x_speed
     #FIXME
-    self.image_left = pygame.transform.scale(fishy_left_image,(self.width,self.height)) 
-    self.image_right = pygame.transform.scale(fishy_right_image,(self.width,self.height)) 
+    self.image_left = pygame.transform.scale(fishy_left_image,(int(self.width),int(self.height))) 
+    self.image_right = pygame.transform.scale(fishy_right_image,(int(self.width),int(self.height))) 
     #stat variables
     self.alive = True
     self.fish_eaten = fish_eaten
@@ -153,9 +152,10 @@ class School():
   def check_add_fish(self):
     #TODO add sizes to fish
     if len(self.fish_list) < MAX_FISH:
+      fish_eaten=random.randint(-35,150)
       #Generate fish
-      width = 40
-      height = 8
+      width = 40 + int(fish_eaten*.2 * 5)
+      height = 8 + int(fish_eaten*.2 * 1)
       direction = 1 if random.randint(0,1) else -1
       x_speed = random.randint(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
       
@@ -163,7 +163,7 @@ class School():
       y = random.randint(0,window_size[1]-height)
 
       #TODO FIXME
-      fish_eaten=0
+      
       
       new_fish = Fish(width,height,x,y,direction,x_speed,fish_eaten)
       self.fish_list.append(new_fish)
@@ -194,6 +194,7 @@ def main():
   main_school = School()
   
   running = True
+  print('Game Start')
   while running:
     #draw 
     screen.blit(fishy_background,(0,0))
@@ -218,7 +219,6 @@ def main():
       
       
       #TESTING PURPOSES
-      main_fishy.fish_eaten = 1
 
 
       #update screen
