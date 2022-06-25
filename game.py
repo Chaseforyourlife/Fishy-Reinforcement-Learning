@@ -16,7 +16,7 @@ RIGHT_IMAGES = {
   'purple':pygame.image.load('static/images/fishy_right_purple.png'),
   'blue':pygame.image.load('static/images/fishy_right_blue.png')
 }
- 
+
 screen = pygame.display.set_mode(window_size)
 FPS = 30
 MAX_FISH = 8
@@ -43,9 +43,36 @@ class Fishy:
     #stat variables
     self.alive = True
     self.fish_eaten = 0
-
+  ##Handle player key presses
+  def handle_keys(self):
+    #change speed and direction based on keys pressed
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+      self.handle_move('L')
+    if keys[pygame.K_RIGHT]:
+      self.handle_move('R')
+    if keys[pygame.K_UP]:
+      self.handle_move('U')
+    if keys[pygame.K_DOWN]:
+      self.handle_move('D')
+  def handle_move(self,direction=None):
+    if direction == 'L':
+      self.x_speed -= .25
+      self.direction = -1
+    elif direction == 'R':
+      self.x_speed += .25
+      self.direction = 1  
+    elif direction == 'U':
+      self.y_speed -= .25
+    elif direction == 'D':
+      self.y_speed += .25
   ##Handle everything related to fishy moving
   def move(self):
+    #if speed is below speed_change, set speed to 0
+    if abs(self.x_speed) < self.x_speed_change:
+      self.x_speed = 0 
+    if abs(self.y_speed) < self.y_speed_change:
+      self.y_speed = 0 
     #check if fish is at top of bottom of screen before changing position
     if self.y <  0:
       self.y = 0
@@ -64,32 +91,14 @@ class Fishy:
     #move by amount of speed
     self.x += self.x_speed
     self.y += self.y_speed
-    #change speed and direction based on keys pressed
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-      self.x_speed -= .25
-      self.direction = -1
-    if keys[pygame.K_RIGHT]:
-      self.x_speed += .25
-      self.direction = 1  
-    if keys[pygame.K_UP]:
-        self.y_speed -= .25
-    if keys[pygame.K_DOWN]:
-      self.y_speed += .25
-    #if speed is below speed_change, set speed to 0
-    if abs(self.x_speed) < self.x_speed_change:
-      self.x_speed = 0 
-    if abs(self.y_speed) < self.y_speed_change:
-      self.y_speed = 0 
   ##Draw fishy image to screen
   def draw(self,screen):
     if self.alive:
       screen.blit(self.image_left if self.direction == -1 else self.image_right,(self.x,self.y))
   ##Called on a schedule to check if fishy collides with any fish
   def check_collide(self,school):
-
+    fish_eaten = 0
     #if self.fish_eaten > 
-    
     for fish in school.fish_list:
       over = False
       lined_up = False
@@ -100,20 +109,25 @@ class Fishy:
       if (self.y < fish.y + fish.height and self.y + self.height > fish.y):
         lined_up = True 
       if over and lined_up:
-        self.collide(fish)
+        eaten = self.collide(fish)
+        if eaten:
+          fish_eaten +=1
+    return fish_eaten
       
   def collide(self,other_fish):
     if other_fish.alive == False:
-      pass
+      return False
     elif self.fish_eaten >= other_fish.fish_eaten and other_fish.alive == True:
       other_fish.alive = False
       self.fish_eaten += 1
       self.width = 40 + int(self.fish_eaten*.2 * 5)
       self.height = 8 + int(self.fish_eaten*.2 * 1)
       self.image_left = pygame.transform.scale(LEFT_IMAGES['orange'],(self.width,self.height)) 
-      self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height)) 
+      self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height))
+      return True 
     else:
       self.alive = False
+      return False
 
   
 
@@ -195,69 +209,5 @@ class School():
     for fish in self.fish_list:
       fish.draw(screen)
 
-  
-
-#use this for fish
-'''class Ship(pygame.sprite.Sprite):
-    def __init__(self, image_file, speed, location):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(image_file)
-        self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = location
-You could then "activate" it like this:
-
-ship = Ship("images\ship.png", [a, b])'''
-
-def main():
-  fishy_background = pygame.image.load('static/images/fishy-background.png')
-  #screen.fill((255,255,255))
-  
-  #pygame.draw.rect(screen,(0,0,0),(225,200,40,20))
-  clock = pygame.time.Clock()
-  
-  main_fishy = Fishy()
-  main_school = School()
-  
-  running = True
-  print('Game Start')
-  while running:
-    #draw 
-    screen.blit(fishy_background,(0,0))
-    clock.tick(FPS)
-    ##Initialize game start
-
-    ###MAIN GAME LOOP AFTER START
-    while main_fishy.alive == True:
-      clock.tick(FPS)
-      #draw background
-      screen.blit(fishy_background,(0,0))
-      #update fish_list
-      main_school.update()
-      #handle main_fishy movement
-      main_fishy.move()
-      #check if fishy collided with any fish in the main_school
-      main_fishy.check_collide(main_school)
-      #draw every fish in the main_school
-      main_school.draw(screen)
-      #draw fishy on the screen
-      main_fishy.draw(screen)
-      
-      ##Ai Events
-      game_state = GAI.get_game_state(main_fishy,main_school)
-      print(len(main_school.fish_list))
-      #update screen
-      pygame.display.update()
-      ##check if window gets closed
-      for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-          running = False
-          pygame.quit()
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        running = False
-        pygame.quit()
 
 
-
-
-main()

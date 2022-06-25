@@ -3235,3 +3235,7 @@ Game Start
 8
 8
 8
+pygame 2.0.0 (SDL 2.0.12, python 3.8.10)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+pygame 2.0.0 (SDL 2.0.12, python 3.8.10)
+Hello from the pygame community. https://www.pygame.org/contribute.html
