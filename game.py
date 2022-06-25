@@ -1,5 +1,6 @@
 import pygame
 import random
+import game_ai as GAI
 
 #VARIABLES#
 window_size = (550,400)
@@ -41,7 +42,7 @@ class Fishy:
     self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height)) 
     #stat variables
     self.alive = True
-    self.fish_eaten = 151
+    self.fish_eaten = 0
 
   ##Handle everything related to fishy moving
   def move(self):
@@ -168,7 +169,7 @@ class School():
 
   def check_add_fish(self):
     #TODO add sizes to fish
-    if len(self.fish_list) < MAX_FISH:
+    while len(self.fish_list) < MAX_FISH:
       fish_eaten=random.randint(-35,150)
       #Generate fish
       width = 40 + int(fish_eaten*.2 * 5)
@@ -193,6 +194,8 @@ class School():
   def draw(self,screen):
     for fish in self.fish_list:
       fish.draw(screen)
+
+  
 
 #use this for fish
 '''class Ship(pygame.sprite.Sprite):
@@ -239,10 +242,9 @@ def main():
       #draw fishy on the screen
       main_fishy.draw(screen)
       
-      
-      #TESTING PURPOSES
-
-
+      ##Ai Events
+      game_state = GAI.get_game_state(main_fishy,main_school)
+      print(len(main_school.fish_list))
       #update screen
       pygame.display.update()
       ##check if window gets closed
