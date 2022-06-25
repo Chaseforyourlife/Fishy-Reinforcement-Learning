@@ -3,12 +3,23 @@ import random
 
 #VARIABLES#
 window_size = (550,400)
-fishy_left_image = pygame.image.load('static/images/fishy_left.png')
-fishy_right_image = pygame.image.load('static/images/fishy_right.png')
+LEFT_IMAGES = {
+  'orange':pygame.image.load('static/images/fishy_left.png'),
+  'pink':pygame.image.load('static/images/fishy_left_pink.png'),
+  'purple':pygame.image.load('static/images/fishy_left_purple.png'),
+  'blue':pygame.image.load('static/images/fishy_left_blue.png')
+}
+RIGHT_IMAGES = {
+  'orange':pygame.image.load('static/images/fishy_right.png'),
+  'pink':pygame.image.load('static/images/fishy_right_pink.png'),
+  'purple':pygame.image.load('static/images/fishy_right_purple.png'),
+  'blue':pygame.image.load('static/images/fishy_right_blue.png')
+}
+ 
 screen = pygame.display.set_mode(window_size)
 FPS = 30
 MAX_FISH = 8
-MAX_FISH_SPEED = 7
+MAX_FISH_SPEED = 6
 MIN_FISH_SPEED = 2
 
 class Fishy:
@@ -26,11 +37,11 @@ class Fishy:
     self.max_y_speed = 8
     self.x_speed_change = .25
     self.y_speed_change = .25
-    self.image_left = pygame.transform.scale(fishy_left_image,(self.width,self.height)) 
-    self.image_right = pygame.transform.scale(fishy_right_image,(self.width,self.height)) 
+    self.image_left = pygame.transform.scale(LEFT_IMAGES['orange'],(self.width,self.height)) 
+    self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height)) 
     #stat variables
     self.alive = True
-    self.fish_eaten = 0
+    self.fish_eaten = 151
 
   ##Handle everything related to fishy moving
   def move(self):
@@ -82,18 +93,24 @@ class Fishy:
       over = False
       lined_up = False
       #Right and Left collision 
-      if(self.x <= fish.x + fish.width and self.x + self.width >= fish.x):
+      if(self.x < fish.x + fish.width and self.x + self.width > fish.x):
         over = True
       #Top and bottom collision
-      if (self.y <= fish.y + fish.height and self.y + self.height >= fish.y):
+      if (self.y < fish.y + fish.height and self.y + self.height > fish.y):
         lined_up = True 
       if over and lined_up:
         self.collide(fish)
       
   def collide(self,other_fish):
-    if self.fish_eaten >= other_fish.fish_eaten and other_fish.alive == True:
+    if other_fish.alive == False:
+      pass
+    elif self.fish_eaten >= other_fish.fish_eaten and other_fish.alive == True:
       other_fish.alive = False
       self.fish_eaten += 1
+      self.width = 40 + int(self.fish_eaten*.2 * 5)
+      self.height = 8 + int(self.fish_eaten*.2 * 1)
+      self.image_left = pygame.transform.scale(LEFT_IMAGES['orange'],(self.width,self.height)) 
+      self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height)) 
     else:
       self.alive = False
 
@@ -101,7 +118,7 @@ class Fishy:
 
 class Fish():
   ##Init function
-  def __init__(self,width,height,x,y,direction,x_speed,fish_eaten):
+  def __init__(self,width,height,x,y,direction,x_speed,fish_eaten,color):
     #positional variables
     self.width = width
     self.height = height
@@ -110,8 +127,8 @@ class Fish():
     self.direction = direction
     self.x_speed = x_speed
     #FIXME
-    self.image_left = pygame.transform.scale(fishy_left_image,(int(self.width),int(self.height))) 
-    self.image_right = pygame.transform.scale(fishy_right_image,(int(self.width),int(self.height))) 
+    self.image_left = pygame.transform.scale(LEFT_IMAGES[color],(int(self.width),int(self.height))) 
+    self.image_right = pygame.transform.scale(RIGHT_IMAGES[color],(int(self.width),int(self.height))) 
     #stat variables
     self.alive = True
     self.fish_eaten = fish_eaten
@@ -157,15 +174,20 @@ class School():
       width = 40 + int(fish_eaten*.2 * 5)
       height = 8 + int(fish_eaten*.2 * 1)
       direction = 1 if random.randint(0,1) else -1
-      x_speed = random.randint(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
+      x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
       
       x = -width if direction == 1 else window_size[0]
       y = random.randint(0,window_size[1]-height)
-
-      #TODO FIXME
       
-      
-      new_fish = Fish(width,height,x,y,direction,x_speed,fish_eaten)
+      if fish_eaten > 120:
+        color = 'blue'
+      elif fish_eaten > 75:
+        color = 'purple'
+      elif fish_eaten > 30:
+        color = 'pink'
+      else:
+        color = 'orange'
+      new_fish = Fish(width,height,x,y,direction,x_speed,fish_eaten,color=color)
       self.fish_list.append(new_fish)
 
   def draw(self,screen):
