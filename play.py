@@ -19,6 +19,9 @@ def main():
             screen.blit(fishy_background,(0,0))
             #update fish_list
             main_school.update()
+            #move fish_list
+            main_school.move()
+            
             #check if fishy collided with any fish in the main_school
             main_fishy.check_collide(main_school)
             #handle key presses

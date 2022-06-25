@@ -1,11 +1,17 @@
 import torch
+import random
 import numpy as np
 from collections import deque
+from model import Linear_QNet,QTrainer
 
 BATCH_SIZE = 1_000
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 MAX_MEMORY = 100_000
-STARTING_EPSILON
+STARTING_EPSILON = 400
+GAMMA = 0.9 # must be less than 1
+INPUT_SIZE = 46
+HIDDEN_SIZE = 256
+OUTPUT_SIZE = 5
 
 
 
@@ -29,8 +35,8 @@ class Agent:
         self.gamma = 0   # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
         #TODO: model,trainer
-        self.model = None
-        self.trainer = None
+        self.model = Linear_QNet(INPUT_SIZE,HIDDEN_SIZE,OUTPUT_SIZE)
+        self.trainer = QTrainer(self.model,LEARNING_RATE,GAMMA)
     def get_state(self,fishy,school):
         game_state = []
         #Input Layer Data
@@ -68,13 +74,17 @@ class Agent:
     def get_action(self,state):
         #random moves: tradeoff exporation/exploitation
         self.epsilon = STARTING_EPSILON - self.n_games
+        #get empty list of 0s to replace with move
+        move = [0,0,0,0,0]
         #Could change what goes into the randint max
         if random.randint(0,STARTING_EPSILON) < self.epsilon:
-            move = random.sample('L','R','U','D',None)
+            move_index = random.randint(0,4)
+            move[move_index] = 1
         else:
             state_tensor = torch.tensor(state,dtype=torch.float)
-            prediction = self.model.predict(state_tensor)
-            move = torch.argmax(prediction).item()
+            prediction = self.model(state_tensor)   # Calls Forward Function of LinearQModel
+            move_index = torch.argmax(prediction).item()
+            move[move_index] = 1
         return move
 
 

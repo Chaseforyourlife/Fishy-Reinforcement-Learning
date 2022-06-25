@@ -1,15 +1,21 @@
 from game import *
 from game_ai import *
+from graph import plot
 
-FPS = 10000
+FPS = 180
 
-def main(MODE = 'play'):
+def main():
   fishy_background = pygame.image.load('static/images/fishy-background.png')
   clock = pygame.time.Clock()
   running = True
   while running:
-    #initialize stats
+    ###GRAPH_STATS
+    plot_fish_eatens = []
+    plot_mean_fish_eatens = []
+    plot_records = []
+    total_fish_eaten = 0
     record = 0
+    
     main_agent = Agent()
     #draw background
     screen.blit(fishy_background,(0,0))
@@ -23,15 +29,18 @@ def main(MODE = 'play'):
         done = False
         ###MAIN GAME LOOP AFTER START
         while done == False:
-            #get original_stae
-            state_old = main_agent.get_state(main_fishy,main_school)
             #start clock
             clock.tick(FPS)
-            #draw background
-            screen.blit(fishy_background,(0,0))
             #update fish_list
             main_school.update()
-            #get ai model inference
+            #get original_state
+            state_old = main_agent.get_state(main_fishy,main_school)
+            #draw background
+            screen.blit(fishy_background,(0,0))
+            
+            #move fish_list
+            main_school.move()
+            ##Get AI Model Inference
             move = main_agent.get_action(state_old)
             #handle move
             main_fishy.handle_move(move)
@@ -61,11 +70,20 @@ def main(MODE = 'play'):
             #train long memory if done
             if done:
                 main_agent.n_games += 1
-                record = max(record,main_fishy.fish_eaten)
+                if main_fishy.fish_eaten > record:
+                    record = main_fishy.fish_eaten
+                    main_agent.model.save()
                 main_agent.train_long_memory()
+                plot_fish_eatens.append(main_fishy.fish_eaten)
+                total_fish_eaten += main_fishy.fish_eaten
+                plot_mean_fish_eaten = total_fish_eaten/main_agent.n_games
+                plot_mean_fish_eatens.append(plot_mean_fish_eaten)
+                plot_record.append(record)
+                plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records)
 
+                
                 print('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)
-                #TODO plot
+                
 
 
             #update screen
@@ -76,9 +94,11 @@ def main(MODE = 'play'):
                     running = False
                     pygame.quit()
         if main_fishy.alive:
-            print('Game Won')
+            #print('Game Won')
+            pass
         elif not main_fishy.alive:
-            print('Game Lost')
+            #print('Game Lost')
+            pass
         #TODO
         ###MAKE PLAY AGAIN METHOD
         for event in pygame.event.get():

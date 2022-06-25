@@ -48,23 +48,25 @@ class Fishy:
     #change speed and direction based on keys pressed
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-      self.handle_move('L')
-    if keys[pygame.K_RIGHT]:
-      self.handle_move('R')
-    if keys[pygame.K_UP]:
-      self.handle_move('U')
-    if keys[pygame.K_DOWN]:
-      self.handle_move('D')
+      self.handle_move([1,0,0,0,0])
+    elif keys[pygame.K_RIGHT]:
+      self.handle_move([0,1,0,0,0])
+    elif keys[pygame.K_UP]:
+      self.handle_move([0,0,1,0,0])
+    elif keys[pygame.K_DOWN]:
+      self.handle_move([0,0,0,1,0])
+    else:
+      self.handle_move([0,0,0,0,1])
   def handle_move(self,direction=None):
-    if direction == 'L':
+    if direction == [1,0,0,0,0]:
       self.x_speed -= .25
       self.direction = -1
-    elif direction == 'R':
+    elif direction == [0,1,0,0,0]:
       self.x_speed += .25
       self.direction = 1  
-    elif direction == 'U':
+    elif direction == [0,0,1,0,0]:
       self.y_speed -= .25
-    elif direction == 'D':
+    elif direction == [0,0,0,1,0]:
       self.y_speed += .25
   ##Handle everything related to fishy moving
   def move(self):
@@ -162,7 +164,6 @@ class School():
     #move all existing fish
     #remove fish beyond boundaries 
     #add new fish randomly
-    self.move()
     self.check_clear_fish()
     self.check_add_fish()
 
