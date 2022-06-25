@@ -49,14 +49,12 @@ class Fishy:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
       self.handle_move([1,0,0,0,0])
-    elif keys[pygame.K_RIGHT]:
+    if keys[pygame.K_RIGHT]:
       self.handle_move([0,1,0,0,0])
-    elif keys[pygame.K_UP]:
+    if keys[pygame.K_UP]:
       self.handle_move([0,0,1,0,0])
-    elif keys[pygame.K_DOWN]:
+    if keys[pygame.K_DOWN]:
       self.handle_move([0,0,0,1,0])
-    else:
-      self.handle_move([0,0,0,0,1])
   def handle_move(self,direction=None):
     if direction == [1,0,0,0,0]:
       self.x_speed -= .25
@@ -71,9 +69,10 @@ class Fishy:
   ##Handle everything related to fishy moving
   def move(self):
     #if speed is below speed_change, set speed to 0
-    if abs(self.x_speed) < self.x_speed_change:
+    
+    if abs(self.x_speed) < self.x_speed_change/2:
       self.x_speed = 0 
-    if abs(self.y_speed) < self.y_speed_change:
+    if abs(self.y_speed) < self.y_speed_change/2:
       self.y_speed = 0 
     #check if fish is at top of bottom of screen before changing position
     if self.y <  0:

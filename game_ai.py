@@ -5,12 +5,13 @@ from collections import deque
 from model import Linear_QNet,QTrainer
 
 BATCH_SIZE = 1_000
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.001
 MAX_MEMORY = 100_000
 STARTING_EPSILON = 400
 GAMMA = 0.9 # must be less than 1
 INPUT_SIZE = 46
-HIDDEN_SIZE = 256
+HIDDEN_SIZE = 128
+HIDDEN2_SIZE = 128
 OUTPUT_SIZE = 5
 
 
@@ -20,8 +21,8 @@ def calculate_reward(fishy,fish_eaten,win):
     if fishy.alive:
         reward += 1
     else:
-        reward -= 50
-    reward += fish_eaten*50
+        reward -= 100
+    reward += fish_eaten*100
     if win:
         reward += 100000
     return reward
@@ -35,7 +36,7 @@ class Agent:
         self.gamma = 0   # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
         #TODO: model,trainer
-        self.model = Linear_QNet(INPUT_SIZE,HIDDEN_SIZE,OUTPUT_SIZE)
+        self.model = Linear_QNet(INPUT_SIZE,HIDDEN_SIZE,HIDDEN2_SIZE,OUTPUT_SIZE)
         self.trainer = QTrainer(self.model,LEARNING_RATE,GAMMA)
     def get_state(self,fishy,school):
         game_state = []
