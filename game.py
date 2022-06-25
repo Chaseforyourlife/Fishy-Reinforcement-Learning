@@ -41,7 +41,7 @@ class Fishy:
     self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height)) 
     #stat variables
     self.alive = True
-    self.fish_eaten = 151
+    self.fish_eaten = 0
 
   ##Handle everything related to fishy moving
   def move(self):
