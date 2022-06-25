@@ -78,8 +78,10 @@ def main():
                 total_fish_eaten += main_fishy.fish_eaten
                 plot_mean_fish_eaten = total_fish_eaten/main_agent.n_games
                 plot_mean_fish_eatens.append(plot_mean_fish_eaten)
-                plot_record.append(record)
-                plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records)
+                plot_records.append(record)
+
+                if main_agent.n_games%100 == 0:
+                    plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records)
 
                 
                 print('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)

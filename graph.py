@@ -12,7 +12,7 @@ def plot(fish_eatens, mean_fish_eatens,records):
     plt.ylabel('Fish Eaten')
     plt.plot(fish_eatens)
     plt.plot(mean_fish_eatens)
-    plt.plot(record)
+    plt.plot(records)
     plt.ylim(ymin=0)
     plt.text(len(fish_eatens)-1, fish_eatens[-1], str(fish_eatens[-1]))
     plt.text(len(mean_fish_eatens)-1, mean_fish_eatens[-1], str(mean_fish_eatens[-1]))
