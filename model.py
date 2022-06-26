@@ -10,10 +10,13 @@ class Linear_QNet(nn.Module):
         self.linear1 = nn.Linear(input_size,hidden_size)
         self.linear2 = nn.Linear(hidden_size,hidden2_size)
         self.linear3 = nn.Linear(hidden2_size,output_size)
-
+        self.load()
     def forward(self,x):
-        x = F.relu(self.linear1(x))
-        x = self.linear2(x)
+        #x = F.relu(self.linear1(x))
+        x = self.linear1(x)
+        x = F.relu(self.linear2(x))
+        #x = self.linear2(x)
+
         x = self.linear3(x)
         return x
 
@@ -23,7 +26,14 @@ class Linear_QNet(nn.Module):
             os.mkdir(model_folder_path)
         file_name = os.path.join(model_folder_path,file_name)
         torch.save(self.state_dict(),file_name)
-
+        
+    def load(self,file_name = 'model.pth'):
+        model_folder_path = './model'
+        if not os.path.exists(model_folder_path):
+            os.mkdir(model_folder_path)
+        file_name = os.path.join(model_folder_path,file_name)
+        if os.path.exists(file_name):
+            self.load_state_dict(torch.load(file_name))
 class QTrainer:
     def __init__(self,model,learning_rate,gamma):
         self.model = model
@@ -52,8 +62,8 @@ class QTrainer:
         for index in range(len(done)):
             Q_new = reward[index]
             if not done[index]:
-                Q_new = reward[index] + self.gamma * torch.max(self.model(next_state))
-            target[index][torch.argmax(action).item()] = Q_new
+                Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
+            target[index][torch.argmax(action[index]).item()] = Q_new
         ## Q_new reward + gamma * max(next_predicted Q value) -> only do this if not done
         # pred.clone()
         # preds[argmax(action)] = Q_new

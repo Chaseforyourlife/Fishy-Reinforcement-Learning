@@ -1,6 +1,7 @@
 import pygame
 import random
-import game_ai as GAI
+from game_ai import *
+
 
 #VARIABLES#
 window_size = (550,400)
@@ -19,9 +20,7 @@ RIGHT_IMAGES = {
 
 screen = pygame.display.set_mode(window_size)
 FPS = 30
-MAX_FISH = 8
-MAX_FISH_SPEED = 6
-MIN_FISH_SPEED = 2
+
 
 class Fishy:
   ##Init function
@@ -45,53 +44,94 @@ class Fishy:
     self.fish_eaten = 0
   ##Handle player key presses
   def handle_keys(self):
+    move = [0,0,0,0,0,0,0,0]
     #change speed and direction based on keys pressed
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-      self.handle_move([1,0,0,0,0])
-    if keys[pygame.K_RIGHT]:
-      self.handle_move([0,1,0,0,0])
-    if keys[pygame.K_UP]:
-      self.handle_move([0,0,1,0,0])
-    if keys[pygame.K_DOWN]:
-      self.handle_move([0,0,0,1,0])
+    if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
+      self.handle_move([0,0,0,0,1,0,0,0,0])
+    elif keys[pygame.K_UP] and keys[pygame.K_RIGHT]:
+      self.handle_move([0,0,0,0,0,1,0,0,0])
+    elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
+      self.handle_move([0,0,0,0,0,0,1,0,0])
+    elif keys[pygame.K_DOWN] and keys[pygame.K_LEFT]:
+      self.handle_move([0,0,0,0,0,0,0,1,0])
+    elif keys[pygame.K_LEFT]:
+      self.handle_move([1,0,0,0,0,0,0,0,0])
+    elif keys[pygame.K_RIGHT]:
+      self.handle_move([0,1,0,0,0,0,0,0,0])
+    elif keys[pygame.K_UP]:
+      self.handle_move([0,0,1,0,0,0,0,0,0])
+    elif keys[pygame.K_DOWN]:
+      self.handle_move([0,0,0,1,0,0,0,0,0])
+    else:
+      self.handle_move([0,0,0,0,0,0,0,0,0])
   def handle_move(self,direction=None):
-    if direction == [1,0,0,0,0]:
+    if direction[0]:
       self.x_speed -= .25
       self.direction = -1
-    elif direction == [0,1,0,0,0]:
+    elif direction[1]:
       self.x_speed += .25
       self.direction = 1  
-    elif direction == [0,0,1,0,0]:
+    elif direction[2]:
       self.y_speed -= .25
-    elif direction == [0,0,0,1,0]:
+    elif direction[3]:
       self.y_speed += .25
+    elif direction[4]:
+      self.x_speed -= .25
+      self.direction = -1
+      self.y_speed -= .25
+    elif direction[5]:
+      self.x_speed += .25
+      self.direction = 1  
+      self.y_speed -= .25
+    elif direction[6]:
+      self.y_speed += .25
+      self.x_speed += .25
+      self.direction = 1
+    elif direction[7]:
+      self.y_speed += .25
+      self.x_speed -= .25
+      self.direction = -1
+    else:
+      pass
   ##Handle everything related to fishy moving
   def move(self):
-    #if speed is below speed_change, set speed to 0
-    
+    stopped = False
+    flipped = False
+    '''
+    #if speed is below speed_change/2, set speed to 0
     if abs(self.x_speed) < self.x_speed_change/2:
       self.x_speed = 0 
     if abs(self.y_speed) < self.y_speed_change/2:
       self.y_speed = 0 
+    '''
     #check if fish is at top of bottom of screen before changing position
     if self.y <  0:
       self.y = 0
       self.y_speed = 0
+      stopped = True
     elif self.y + self.height > window_size[1]:
       self.y = window_size[1] - self.height
       self.y_speed = 0
+      stopped = True
     #check if fish is past edge of screen before changing position
     if self.x + self.width/2 < 0:
-      self.x = window_size[0] - self.width/2
+      #self.x = window_size[0] - self.width/2
+      self.x = 0
+      flipped = True
     elif self.x + self.width/2 > window_size[0]:
-      self.x = 0 - self.width/2
+      #self.x = 0 - self.width/2
+      self.x = window_size[0]-self.width
+      flipped = True
     #decrease speed overtime and set max speed
     self.x_speed -= self.x_speed/(self.max_x_speed/self.x_speed_change)
     self.y_speed -= self.y_speed/(self.max_y_speed/self.y_speed_change)
     #move by amount of speed
     self.x += self.x_speed
     self.y += self.y_speed
+    
+    return flipped,stopped
+
   ##Draw fishy image to screen
   def draw(self,screen):
     if self.alive:
@@ -184,16 +224,18 @@ class School():
   def check_add_fish(self):
     #TODO add sizes to fish
     while len(self.fish_list) < MAX_FISH:
-      fish_eaten=random.randint(-35,150)
+      fish_eaten=random.randint(-35,MAX_FISH_SIZE)
       #Generate fish
       width = 40 + int(fish_eaten*.2 * 5)
       height = 8 + int(fish_eaten*.2 * 1)
       direction = 1 if random.randint(0,1) else -1
-      x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
-      
-      x = -width if direction == 1 else window_size[0]
-      y = random.randint(0,window_size[1]-height)
-      
+      #x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
+      x_speed = 0
+      #x = -width if direction == 1 else window_size[0]
+      #x = random.randint(0,window_size[0]-width)
+      x = window_size[0]/2 - width/2
+      #y = random.randint(int(-height/2),int(window_size[1]-height/2))
+      y = random.randint(0,int(window_size[1]-height))
       if fish_eaten > 120:
         color = 'blue'
       elif fish_eaten > 75:

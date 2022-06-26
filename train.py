@@ -1,8 +1,8 @@
 from game import *
 from game_ai import *
-from graph import plot
+from graph import plot,plot_time
 
-FPS = 180
+FPS = 540
 
 def main():
   fishy_background = pygame.image.load('static/images/fishy-background.png')
@@ -15,6 +15,11 @@ def main():
     plot_records = []
     total_fish_eaten = 0
     record = 0
+    plot_time_alives = []
+    plot_mean_time_alives = []
+    plot_time_records = []
+    total_time_alive = 0 
+    time_record = 0
     
     main_agent = Agent()
     #draw background
@@ -24,11 +29,12 @@ def main():
         ##Initialize train start
         main_fishy = Fishy()
         main_school = School()
-        
+        time_alive = 0
         win = False
         done = False
         ###MAIN GAME LOOP AFTER START
         while done == False:
+            time_alive += 1/FPS
             #start clock
             clock.tick(FPS)
             #update fish_list
@@ -45,7 +51,7 @@ def main():
             #handle move
             main_fishy.handle_move(move)
             #handle main_fishy movement
-            main_fishy.move()
+            flipped,stopped = main_fishy.move()
             #check if fishy collided with any fish in the main_school
             fish_eaten = main_fishy.check_collide(main_school)
             #draw every fish in the main_school
@@ -53,14 +59,14 @@ def main():
             #draw fishy on the screen
             main_fishy.draw(screen)
             ##End game if fishy reaches 150, break and later check if fishy is alive
-            if main_fishy.fish_eaten >= 150:
+            if main_fishy.fish_eaten >= MAX_FISH_SIZE+4:
                 win = True
-                done = False
+                done = True
             if main_fishy.alive == False:
                 done = True
             ##Ai Events
             #calculate reward based on if fishy is alive and if he ate anything
-            reward = calculate_reward(main_fishy,fish_eaten,win)
+            reward = calculate_reward(main_fishy,fish_eaten,win,flipped,stopped)
             #get new game state
             state_new = main_agent.get_state(main_fishy,main_school)
             #train short memory
@@ -70,7 +76,7 @@ def main():
             #train long memory if done
             if done:
                 main_agent.n_games += 1
-                if main_fishy.fish_eaten > record:
+                if main_fishy.fish_eaten >= record:
                     record = main_fishy.fish_eaten
                     main_agent.model.save()
                 main_agent.train_long_memory()
@@ -79,9 +85,15 @@ def main():
                 plot_mean_fish_eaten = total_fish_eaten/main_agent.n_games
                 plot_mean_fish_eatens.append(plot_mean_fish_eaten)
                 plot_records.append(record)
-
-                if main_agent.n_games%100 == 0:
+                if time_alive > time_record:
+                    time_record = time_alive
+                plot_time_alives.append(time_alive)
+                total_time_alive += time_alive
+                plot_mean_time_alives.append(total_time_alive/main_agent.n_games)
+                plot_time_records.append(time_record)
+                if main_agent.n_games%1+1 == 1:
                     plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records)
+                    plot_time(plot_time_alives,plot_mean_time_alives,plot_time_records)
 
                 
                 print('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)
