@@ -5,18 +5,18 @@ from collections import deque
 from model import Linear_QNet,QTrainer
 window_size = (550,400)
 MAX_FISH = 1
-MAX_FISH_SPEED = 0 #6
-MIN_FISH_SPEED = 0 #2
-MAX_FISH_SIZE = 0 #150
+MAX_FISH_SPEED = 2 #6
+MIN_FISH_SPEED = 1 #2
+MAX_FISH_SIZE = 30 #150
 
-BATCH_SIZE = 1000
-LEARNING_RATE = .01
+BATCH_SIZE = 5000
+LEARNING_RATE = .1
 MAX_MEMORY = 100_000
-EPSILON = .01
+EPSILON = 0
 GAMMA = 0.9 # must be less than 1
-INPUT_SIZE = 6+2+MAX_FISH*6
-HIDDEN_SIZE = 64
-HIDDEN2_SIZE = 32
+INPUT_SIZE = 6+2+MAX_FISH*8
+HIDDEN_SIZE = 32
+HIDDEN2_SIZE = 16
 OUTPUT_SIZE = 9
 
 
@@ -24,15 +24,17 @@ OUTPUT_SIZE = 9
 def calculate_reward(fishy,fish_eaten,win,flipped,stopped):
     reward = 0
     if flipped:
-        reward -=10
+        reward -=15
+        pass
     if stopped:
-        reward -=10
+        reward -=15
+        pass
     if fishy.alive:
-        #reward -= 1
+        reward -= 1
         pass
     else:
-        reward -= 30
-    reward += fish_eaten*30
+        reward -= 100
+    reward += fish_eaten*50
     if win:
         #reward += 1000
         pass
@@ -60,6 +62,8 @@ class Agent:
         game_state.append(fishy.y_speed)
         #Add data for all fish
         for fish in school.fish_list:
+            game_state.append(fish.x-fishy.x)
+            game_state.append(fish.y-fishy.y)
             game_state.append(fish.x) #x1
             game_state.append(fish.y) #y1
             game_state.append(fishy.x + fish.width) #x2
@@ -80,6 +84,7 @@ class Agent:
         self.trainer.train_step(state,action,reward,next_state,done)
 
     def train_long_memory(self):
+        self.epsilon -= .01
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory,BATCH_SIZE)
         else:
@@ -94,7 +99,8 @@ class Agent:
         #get empty list of 0s to replace with move
         move = [0,0,0,0,0,0,0,0,0]
         #Could change what goes into the randint max
-        if random.randrange(0,1) < self.epsilon:
+        if random.randrange(0,100)/100 < self.epsilon:
+            
             move_index = random.randint(0,8)
             move[move_index] = 1
         else:

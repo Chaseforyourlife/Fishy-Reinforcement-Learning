@@ -229,11 +229,11 @@ class School():
       width = 40 + int(fish_eaten*.2 * 5)
       height = 8 + int(fish_eaten*.2 * 1)
       direction = 1 if random.randint(0,1) else -1
-      #x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
-      x_speed = 0
-      #x = -width if direction == 1 else window_size[0]
+      x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
+      #x_speed = 0
+      x = -width if direction == 1 else window_size[0]
       #x = random.randint(0,window_size[0]-width)
-      x = window_size[0]/2 - width/2
+      #x = window_size[0]/2 - width/2
       #y = random.randint(int(-height/2),int(window_size[1]-height/2))
       y = random.randint(0,int(window_size[1]-height))
       if fish_eaten > 120:

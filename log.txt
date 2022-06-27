@@ -1,0 +1,22 @@
+pygame 2.0.0 (SDL 2.0.12, python 3.8.10)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+<generator object Module.parameters at 0x00000224DFED2350>
+[2K[2KFigure(640x480)
+[2K[2KFigure(640x480)
+Game: 1 Fish Eaten: 4 Record: 4
+<generator object Module.parameters at 0x00000224E48ACA50>
+[2K[2KFigure(640x480)
+[2K[2KFigure(640x480)
+Game: 2 Fish Eaten: 4 Record: 4
+<generator object Module.parameters at 0x00000224E352CF20>
+[2K[2KFigure(640x480)
+[2K[2KFigure(640x480)
+Game: 3 Fish Eaten: 4 Record: 4
+<generator object Module.parameters at 0x00000224EBDE8190>
+[2K[2KFigure(640x480)
+[2K[2KFigure(640x480)
+Game: 4 Fish Eaten: 4 Record: 4
+<generator object Module.parameters at 0x00000224EBDE8970>
+[2K[2KFigure(640x480)
+[2K[2KFigure(640x480)
+Game: 5 Fish Eaten: 4 Record: 4
