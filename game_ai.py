@@ -10,10 +10,10 @@ MIN_FISH_SPEED = 1 #2
 MAX_FISH_SIZE = 30 #150
 MIN_FISH_SIZE = -35
 
-BATCH_SIZE = 5000
+BATCH_SIZE = 1000
 LEARNING_RATE = .0001
-MAX_MEMORY = 1_000
-EPSILON = 10
+MAX_MEMORY = 100_000
+EPSILON = 2
 MIN_EPSILON = 0.0
 GAMMA = 0.9 # must be less than 1
 
@@ -102,13 +102,13 @@ class Agent:
         if self.epsilon > self.min_epsilon:
             self.epsilon -= .01
         '''
-        '''
+        
         if len(self.memory) > BATCH_SIZE:
             print('LARGER THAN BATCH SIZE')
             mini_sample = random.sample(self.memory,BATCH_SIZE)
         else:
             mini_sample = self.memory
-        '''
+        
         #TRY THIS
         mini_sample = self.memory
         states,actions,rewards,next_states,dones = zip(*mini_sample)
