@@ -118,11 +118,15 @@ class Fishy:
     if self.x + self.width/2 < 0:
       #self.x = window_size[0] - self.width/2
       self.x = 0
+      #remove later
+      self.x_speed = 0
       flipped = True
     elif self.x + self.width/2 > window_size[0]:
       #self.x = 0 - self.width/2
       self.x = window_size[0]-self.width
       flipped = True
+      #remove later
+      self.x_speed = 0
     #decrease speed overtime and set max speed
     self.x_speed -= self.x_speed/(self.max_x_speed/self.x_speed_change)
     self.y_speed -= self.y_speed/(self.max_y_speed/self.y_speed_change)

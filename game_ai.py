@@ -11,10 +11,10 @@ MAX_FISH_SIZE = 30 #150
 MIN_FISH_SIZE = -35
 
 BATCH_SIZE = 5000
-LEARNING_RATE = .0005
-MAX_MEMORY = 100_000
-EPSILON = 1
-MIN_EPSILON = .02
+LEARNING_RATE = .0001
+MAX_MEMORY = 1_000
+EPSILON = 10
+MIN_EPSILON = 0.0
 GAMMA = 0.9 # must be less than 1
 
 INPUT_SIZE = 6+2+MAX_FISH*8
@@ -25,23 +25,23 @@ OUTPUT_SIZE = 9
 
 RANDOM_MOVE_INDEX = None
 RANDOM_MOVES_REMAINING =  0
-RANDOM_MOVES_CONSTANT = 30
+RANDOM_MOVES_CONSTANT = 15
 
 
 def calculate_reward(fishy,fish_eaten,win,flipped,stopped):
     reward = 0
     if flipped:
-        reward -=15
+        reward -=1
         pass
     if stopped:
-        reward -=15
+        reward -=1
         pass
     if fishy.alive:
-        reward += 1
+        #reward -= 1
         pass
     else:
-        reward -= 100
-    reward += fish_eaten*50
+        reward -= 50
+    reward += fish_eaten*10
     if win:
         #reward += 1000
         pass
@@ -94,12 +94,23 @@ class Agent:
         self.trainer.train_step(state,action,reward,next_state,done)
 
     def train_long_memory(self):
+        if self.epsilon < 1:
+            self.epsilon = 0
+        else:
+            self.epsilon -= .01
+        '''
         if self.epsilon > self.min_epsilon:
             self.epsilon -= .01
+        '''
+        '''
         if len(self.memory) > BATCH_SIZE:
+            print('LARGER THAN BATCH SIZE')
             mini_sample = random.sample(self.memory,BATCH_SIZE)
         else:
             mini_sample = self.memory
+        '''
+        #TRY THIS
+        mini_sample = self.memory
         states,actions,rewards,next_states,dones = zip(*mini_sample)
         self.trainer.train_step(states,actions,rewards,next_states,dones)
     

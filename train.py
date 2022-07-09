@@ -70,7 +70,7 @@ def main():
             #get new game state
             state_new = main_agent.get_state(main_fishy,main_school)
             #train short memory
-            main_agent.train_short_memory(state_old,move,reward,state_new,done)
+            #main_agent.train_short_memory(state_old,move,reward,state_new,done)
             #remember
             main_agent.remember(state_old,move,reward,state_new,done)
             #train long memory if done
