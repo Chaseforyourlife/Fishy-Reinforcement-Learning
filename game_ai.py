@@ -7,20 +7,20 @@ window_size = (550,400)
 MAX_FISH = 1
 MAX_FISH_SPEED = 2 #6
 MIN_FISH_SPEED = 1 #2
-MAX_FISH_SIZE = 30 #150
+MAX_FISH_SIZE = 0 #30 #150
 MIN_FISH_SIZE = -35
 
 BATCH_SIZE = 1000
 LEARNING_RATE = .0001
-MAX_MEMORY = 100_000
+MAX_MEMORY = 1_000
 EPSILON = 2
 MIN_EPSILON = 0.0
 GAMMA = 0.9 # must be less than 1
 
 INPUT_SIZE = 6+2+MAX_FISH*8
 
-HIDDEN_SIZE = 32
-HIDDEN2_SIZE = 16
+HIDDEN_SIZE = 64
+HIDDEN2_SIZE = 32
 OUTPUT_SIZE = 9
 
 RANDOM_MOVE_INDEX = None
@@ -40,8 +40,8 @@ def calculate_reward(fishy,fish_eaten,win,flipped,stopped):
         #reward -= 1
         pass
     else:
-        reward -= 50
-    reward += fish_eaten*10
+        reward -= 500
+    reward += fish_eaten*100
     if win:
         #reward += 1000
         pass
@@ -54,7 +54,7 @@ class Agent:
         self.n_games = 0
         self.epsilon = EPSILON  # randomness
         self.min_epsilon = MIN_EPSILON
-        self.gamma = 0   # discount rate
+        self.gamma = GAMMA   # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
         #TODO: model,trainer
         self.model = Linear_QNet(INPUT_SIZE,HIDDEN_SIZE,HIDDEN2_SIZE,OUTPUT_SIZE)
@@ -102,13 +102,13 @@ class Agent:
         if self.epsilon > self.min_epsilon:
             self.epsilon -= .01
         '''
-        
+        '''
         if len(self.memory) > BATCH_SIZE:
             print('LARGER THAN BATCH SIZE')
             mini_sample = random.sample(self.memory,BATCH_SIZE)
         else:
             mini_sample = self.memory
-        
+        '''
         #TRY THIS
         mini_sample = self.memory
         states,actions,rewards,next_states,dones = zip(*mini_sample)

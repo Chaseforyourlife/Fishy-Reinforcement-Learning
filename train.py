@@ -54,6 +54,9 @@ def main():
             flipped,stopped = main_fishy.move()
             #check if fishy collided with any fish in the main_school
             fish_eaten = main_fishy.check_collide(main_school)
+            #####TEMPORARY
+            if fish_eaten > 0:
+                done = True
             #draw every fish in the main_school
             main_school.draw(screen)
             #draw fishy on the screen
@@ -70,7 +73,7 @@ def main():
             #get new game state
             state_new = main_agent.get_state(main_fishy,main_school)
             #train short memory
-            #main_agent.train_short_memory(state_old,move,reward,state_new,done)
+            ###main_agent.train_short_memory(state_old,move,reward,state_new,done)
             #remember
             main_agent.remember(state_old,move,reward,state_new,done)
             #train long memory if done
