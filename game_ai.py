@@ -13,8 +13,8 @@ MIN_FISH_SIZE = -35
 BATCH_SIZE = 1000
 LEARNING_RATE = .0001
 MAX_MEMORY = 1_000
-EPSILON = 2
-MIN_EPSILON = 0.0
+EPSILON = .00
+MIN_EPSILON = 0.00
 GAMMA = 0.9 # must be less than 1
 
 INPUT_SIZE = 6+2+MAX_FISH*8
@@ -31,13 +31,13 @@ RANDOM_MOVES_CONSTANT = 15
 def calculate_reward(fishy,fish_eaten,win,flipped,stopped):
     reward = 0
     if flipped:
-        reward -=1
+        reward -=20
         pass
     if stopped:
-        reward -=1
+        reward -=5
         pass
     if fishy.alive:
-        #reward -= 1
+        reward -= 1
         pass
     else:
         reward -= 500
@@ -94,10 +94,14 @@ class Agent:
         self.trainer.train_step(state,action,reward,next_state,done)
 
     def train_long_memory(self):
+        if self.epsilon > self.min_epsilon:
+            self.epsilon -=.01
+        '''
         if self.epsilon < 1:
             self.epsilon = 0
         else:
             self.epsilon -= .01
+        '''
         '''
         if self.epsilon > self.min_epsilon:
             self.epsilon -= .01
