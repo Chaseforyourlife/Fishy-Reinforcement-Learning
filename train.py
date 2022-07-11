@@ -2,7 +2,7 @@ from game import *
 from game_ai import *
 from graph import plot,plot_time
 
-FPS = 1600 #30
+FPS = 500#1600 #30
 
 def main():
   fishy_background = pygame.image.load('static/images/fishy-background.png')
@@ -36,7 +36,7 @@ def main():
         while done == False:
             time_alive += 1/FPS
             #start clock
-            clock.tick(FPS)
+            #####clock.tick(FPS)
             #update fish_list
             main_school.update()
             #get original_state
@@ -82,7 +82,8 @@ def main():
                 if main_fishy.fish_eaten >= record:
                     record = main_fishy.fish_eaten
                     main_agent.model.save()
-                    print(main_agent.model.parameters())
+                    print('MODEL SAVED')
+                    #print(main_agent.model.parameters())
                 main_agent.train_long_memory()
                 plot_fish_eatens.append(main_fishy.fish_eaten)
                 total_fish_eaten += main_fishy.fish_eaten

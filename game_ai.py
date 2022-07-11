@@ -11,11 +11,11 @@ MAX_FISH_SIZE = 0 #30 #150
 MIN_FISH_SIZE = -35
 
 BATCH_SIZE = 1000
-LEARNING_RATE = .0001
+LEARNING_RATE = .0005
 MAX_MEMORY = 1_000
-EPSILON = .00
-MIN_EPSILON = 0.00
-GAMMA = 0.9 # must be less than 1
+EPSILON = 0.01
+MIN_EPSILON = 0.01
+GAMMA = 0.90 # must be less than 1
 
 INPUT_SIZE = 6+2+MAX_FISH*8
 
@@ -25,19 +25,19 @@ OUTPUT_SIZE = 9
 
 RANDOM_MOVE_INDEX = None
 RANDOM_MOVES_REMAINING =  0
-RANDOM_MOVES_CONSTANT = 15
+RANDOM_MOVES_CONSTANT = 5
 
 
 def calculate_reward(fishy,fish_eaten,win,flipped,stopped):
     reward = 0
     if flipped:
-        reward -=20
+        reward -=100
         pass
     if stopped:
-        reward -=5
+        reward -=50
         pass
     if fishy.alive:
-        reward -= 1
+        #reward -= 1
         pass
     else:
         reward -= 500
@@ -126,14 +126,17 @@ class Agent:
         move = [0,0,0,0,0,0,0,0,0]
         #Could change what goes into the randint max
         if self.random_moves_remaining > 0:
+            #print('KEEP RANDOM')
             move[self.random_move_index] = 1
             self.random_moves_remaining -=1 
         elif random.randrange(0,100)/100 < self.epsilon:
+            #print('RANDOM')
             move_index = random.randint(0,8)
             move[move_index] = 1
             self.random_move_index = move_index
             self.random_moves_remaining = RANDOM_MOVES_CONSTANT
         else:
+            #print('NOT RANDOM')
             state_tensor = torch.tensor(state,dtype=torch.float)
             prediction = self.model(state_tensor)   # Calls Forward Function of LinearQModel
             move_index = torch.argmax(prediction).item()
