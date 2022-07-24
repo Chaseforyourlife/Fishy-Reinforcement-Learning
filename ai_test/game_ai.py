@@ -10,14 +10,17 @@ MIN_FISH_SPEED = 1 #2
 MAX_FISH_SIZE = 0 #30 #150
 MIN_FISH_SIZE = -35
 
-BATCH_SIZE = 1000
-LEARNING_RATE = .001
-MAX_MEMORY = 1_000
-EPSILON = 0.05
-MIN_EPSILON = 0.01
-GAMMA = 0.90 # must be less than 1
 
-INPUT_SIZE = 6+2+MAX_FISH*8
+TELEMETRY = False
+BATCH_SIZE = 500
+LEARNING_RATE = .01
+MAX_MEMORY = 500#1_000_000
+STARTING_MEMORY = 500#2_000
+EPSILON = 1
+MIN_EPSILON = 1
+GAMMA = .9 #0.90 # must be less than 1
+
+INPUT_SIZE = 2+MAX_FISH*2# 6+2+MAX_FISH*8
 
 HIDDEN_SIZE = 64
 HIDDEN2_SIZE = 32
@@ -25,26 +28,43 @@ OUTPUT_SIZE = 9
 
 RANDOM_MOVE_INDEX = None
 RANDOM_MOVES_REMAINING =  0
-RANDOM_MOVES_CONSTANT = 15
+RANDOM_MOVES_CONSTANT = 5
 
+FRAME_FREQUENCY = 100
 
-def calculate_reward(fishy,fish_eaten,win,flipped,stopped):
+def printt(*strings):
+    if TELEMETRY:
+        for string in strings:
+            print(string)
+
+def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped):
     reward = 0
+    #get reward based on distance from fish
+    for fish in school.fish_list:
+        
+        temp_reward = 5/((abs(fishy.x-fish.x)+abs(fishy.y-fish.y)))
+        if fish.fish_eaten>fishy.fish_eaten:
+            reward+=-1*temp_reward
+        else:
+            reward+=temp_reward
+    #print(flipped)
+
     if flipped:
-        reward -=1
+        reward -=10
         pass
     if stopped:
-        reward -=1
+        reward -=10
         pass
     if fishy.alive:
-        #reward -= 1
+        reward -= 1
         pass
     else:
         reward -= 50
-    reward += fish_eaten*1
+    reward += fish_eaten*50
     if win:
         #reward += 1000
         pass
+    #print('REWARD',reward)
     return reward
 
 
@@ -64,6 +84,7 @@ class Agent:
     def get_state(self,fishy,school):
         #####NORMALIZE INPUTS
         game_state = []
+        '''
         #Input Layer Data
         game_state.append(fishy.x/window_size[0]) #x1
         game_state.append(fishy.y/window_size[1]) #y1
@@ -86,7 +107,15 @@ class Agent:
         game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
         #game_state.append(fishy.y) #distance from up
         game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
-       
+       '''
+       #Fishy x and y
+        game_state.append((fishy.x+fishy.width/2)/window_size[0])
+        game_state.append((fishy.y+fishy.height/2)/window_size[1])
+        #fish x and y
+        for fish in school.fish_list:
+            game_state.append((fish.x+fish.width/2)/window_size[0])
+            game_state.append((fish.y+fish.height/2)/window_size[1])
+
         return np.array(game_state,dtype=float)
 
     def remember(self,state,action,reward,next_state,done):
@@ -96,6 +125,7 @@ class Agent:
         self.trainer.train_step(state,action,reward,next_state,done)
 
     def train_long_memory(self):
+        printt('Train_long_memory')
         if self.epsilon > self.min_epsilon:
             self.epsilon -=.01
         '''
@@ -108,15 +138,16 @@ class Agent:
         if self.epsilon > self.min_epsilon:
             self.epsilon -= .01
         '''
-        '''
+        
         if len(self.memory) > BATCH_SIZE:
             print('LARGER THAN BATCH SIZE')
             mini_sample = random.sample(self.memory,BATCH_SIZE)
         else:
             mini_sample = self.memory
-        '''
+        
         #TRY THIS
-        mini_sample = self.memory
+        #printt('MEMORY:',self.memory)
+        #mini_sample = self.memory
         states,actions,rewards,next_states,dones = zip(*mini_sample)
         self.trainer.train_step(states,actions,rewards,next_states,dones)
     
@@ -128,21 +159,21 @@ class Agent:
         move = [0,0,0,0,0,0,0,0,0]
         #Could change what goes into the randint max
         if self.random_moves_remaining > 0:
-            #print('KEEP RANDOM')
+            printt('KEEP RANDOM')
             move[self.random_move_index] = 1
             self.random_moves_remaining -=1 
         elif random.randrange(0,100)/100 < self.epsilon:
-            #print('RANDOM')
+            printt('RANDOM')
             move_index = random.randint(0,8)
             move[move_index] = 1
             self.random_move_index = move_index
             self.random_moves_remaining = RANDOM_MOVES_CONSTANT
         else:
-            #print('NOT RANDOM')
+            printt('NOT RANDOM')
             state_tensor = torch.tensor(state,dtype=torch.float)
             prediction = self.model(state_tensor)   # Calls Forward Function of LinearQModel
             move_index = torch.argmax(prediction).item()
-
+            printt('Move_index:',move_index)
             move[move_index] = 1
         return move
 
