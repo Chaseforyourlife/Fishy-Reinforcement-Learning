@@ -12,10 +12,10 @@ MIN_FISH_SIZE = -35
 
 
 TELEMETRY = False
-BATCH_SIZE = 500
-LEARNING_RATE = .01
-MAX_MEMORY = 500#1_000_000
-STARTING_MEMORY = 500#2_000
+BATCH_SIZE = 64
+LEARNING_RATE = .0001
+MAX_MEMORY = 100_000#1_000_000
+STARTING_MEMORY = 1_000#2_000
 EPSILON = 1
 MIN_EPSILON = 1
 GAMMA = .9 #0.90 # must be less than 1
@@ -28,7 +28,7 @@ OUTPUT_SIZE = 9
 
 RANDOM_MOVE_INDEX = None
 RANDOM_MOVES_REMAINING =  0
-RANDOM_MOVES_CONSTANT = 5
+RANDOM_MOVES_CONSTANT = 1
 
 FRAME_FREQUENCY = 100
 
@@ -42,21 +42,23 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped):
     #get reward based on distance from fish
     for fish in school.fish_list:
         
-        temp_reward = 5/((abs(fishy.x-fish.x)+abs(fishy.y-fish.y)))
+        temp_reward = 25/max(1,((abs(fishy.x-fish.x)+abs(fishy.y-fish.y))))
         if fish.fish_eaten>fishy.fish_eaten:
             reward+=-1*temp_reward
+            pass
         else:
             reward+=temp_reward
+            pass
     #print(flipped)
 
     if flipped:
-        reward -=10
+        #reward -=10
         pass
     if stopped:
-        reward -=10
+        #reward -=10
         pass
     if fishy.alive:
-        reward -= 1
+        #reward -= 1
         pass
     else:
         reward -= 50

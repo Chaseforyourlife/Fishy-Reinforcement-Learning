@@ -73,9 +73,10 @@ class QTrainer:
             printt(action[index])
             printt(reward[index])
             Q_new = reward[index]
-            if not done[index]:
-                printt('not done')
-                Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
+            #if not done[index]:
+                #printt('not done')
+                #Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
+            Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
             target[index][torch.argmax(action[index]).item()] = Q_new
         ## Q_new reward + gamma * max(next_predicted Q value) -> only do this if not done
         # pred.clone()

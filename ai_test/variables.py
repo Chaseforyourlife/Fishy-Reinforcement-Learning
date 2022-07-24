@@ -1,0 +1,4 @@
+
+SPEED = 10
+FPS = 600 #30
+FRAME_MAX = 60

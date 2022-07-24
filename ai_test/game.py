@@ -2,6 +2,7 @@ import pygame
 import random
 from game_ai import *
 import collections
+from variables import *
 
 #VARIABLES#
 window_size = (550,400)
@@ -69,30 +70,30 @@ class Fishy:
   def handle_move(self,direction=None):
     self.moves_counter[direction.index(1)]+=1
     if direction[0]:
-      self.x -= 1
+      self.x -= 1* SPEED
       self.direction = -1
     elif direction[1]:
-      self.x += 1
+      self.x += 1* SPEED
       self.direction = 1  
     elif direction[2]:
-      self.y -= 1
+      self.y -= 1* SPEED
     elif direction[3]:
-      self.y += 1
+      self.y += 1* SPEED
     elif direction[4]:
-      self.x -= .7
+      self.x -= .7* SPEED
       self.direction = -1
-      self.y -= .7
+      self.y -= .7* SPEED
     elif direction[5]:
-      self.x += .7
+      self.x += .7* SPEED
       self.direction = 1  
-      self.y -= .7
+      self.y -= .7* SPEED
     elif direction[6]:
-      self.y += .7
-      self.x += .7
+      self.y += .7* SPEED
+      self.x += .7* SPEED
       self.direction = 1
     elif direction[7]:
-      self.y += .7
-      self.x -= .7
+      self.y += .7* SPEED
+      self.x -= .7* SPEED
       self.direction = -1
     else:
       pass
@@ -242,9 +243,9 @@ class School():
       #x = 400
       x = random.randint(0,window_size[0]-width)
       #x = window_size[0]/2 - width/2
-      y = random.randint(int(-height/2),int(window_size[1]-height/2))
+      #y = random.randint(int(-height/2),int(window_size[1]-height/2))
       #y = random.randint(0,int(window_size[1]-height))
-      #y = 200
+      y = 200
       if fish_eaten > 120:
         color = 'blue'
       elif fish_eaten > 75:

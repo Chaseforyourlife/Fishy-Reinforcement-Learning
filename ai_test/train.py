@@ -1,9 +1,9 @@
 from game import *
 from game_ai import *
 from graph import plot,plot_time
+from variables import *
 
-FPS = 1600 #30
-TIME_MAX = 1
+
 
 def main():
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
@@ -36,7 +36,7 @@ def main():
         done = False
         ###MAIN GAME LOOP AFTER START
         while done == False:
-            time_alive += 1/FPS
+            time_alive += 1
             #start clock
             clock.tick(FPS)
             frame_number +=1 
@@ -70,7 +70,7 @@ def main():
                 done = True
             if main_fishy.alive == False:
                 done = True
-            if time_alive > TIME_MAX:
+            if time_alive >= FRAME_MAX:
                 done = True
             ##Ai Events
             #calculate reward based on if fishy is alive and if he ate anything
@@ -97,7 +97,7 @@ def main():
                 if len(main_agent.memory) >= STARTING_MEMORY:
                     print('TRAIN LONG TERM MEMORY')
                     print('EPSION:',main_agent.epsilon)
-                    main_agent.min_epsilon = .02
+                    main_agent.min_epsilon = .05
                     main_agent.train_long_memory()
                 plot_fish_eatens.append(main_fishy.fish_eaten)
                 total_fish_eaten += main_fishy.fish_eaten
