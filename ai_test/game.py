@@ -49,14 +49,15 @@ class Fishy:
     move = [0,0,0,0,0,0,0,0]
     #change speed and direction based on keys pressed
     keys = pygame.key.get_pressed()
+    
     if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
-      self.handle_move([0,0,0,0,1,0,0,0,0])
-    elif keys[pygame.K_UP] and keys[pygame.K_RIGHT]:
       self.handle_move([0,0,0,0,0,1,0,0,0])
-    elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
+    elif keys[pygame.K_UP] and keys[pygame.K_RIGHT]:
       self.handle_move([0,0,0,0,0,0,1,0,0])
-    elif keys[pygame.K_DOWN] and keys[pygame.K_LEFT]:
+    elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
       self.handle_move([0,0,0,0,0,0,0,1,0])
+    elif keys[pygame.K_DOWN] and keys[pygame.K_LEFT]:
+      self.handle_move([0,0,0,0,0,0,0,0,1])
     elif keys[pygame.K_LEFT]:
       self.handle_move([1,0,0,0,0,0,0,0,0])
     elif keys[pygame.K_RIGHT]:
@@ -66,7 +67,19 @@ class Fishy:
     elif keys[pygame.K_DOWN]:
       self.handle_move([0,0,0,1,0,0,0,0,0])
     else:
-      self.handle_move([0,0,0,0,0,0,0,0,0])
+      self.handle_move([0,0,0,0,1,0,0,0,0])
+    '''
+    elif keys[pygame.K_LEFT]:
+      self.handle_move([1,0,0,0,0])
+    elif keys[pygame.K_RIGHT]:
+      self.handle_move([0,1,0,0,0])
+    elif keys[pygame.K_UP]:
+      self.handle_move([0,0,1,0,0])
+    elif keys[pygame.K_DOWN]:
+      self.handle_move([0,0,0,1,0])
+    else:
+      self.handle_move([0,0,0,0,0])
+    '''
   def handle_move(self,direction=None):
     self.moves_counter[direction.index(1)]+=1
     if direction[0]:
@@ -79,24 +92,25 @@ class Fishy:
       self.y -= 1* SPEED
     elif direction[3]:
       self.y += 1* SPEED
+    #THIS IS DON'T MOVE
     elif direction[4]:
+      pass
+    elif direction[5]:
       self.x -= .7* SPEED
       self.direction = -1
       self.y -= .7* SPEED
-    elif direction[5]:
+    elif direction[6]:
       self.x += .7* SPEED
       self.direction = 1  
       self.y -= .7* SPEED
-    elif direction[6]:
+    elif direction[7]:
       self.y += .7* SPEED
       self.x += .7* SPEED
       self.direction = 1
-    elif direction[7]:
+    elif direction[8]:
       self.y += .7* SPEED
       self.x -= .7* SPEED
       self.direction = -1
-    else:
-      pass
   ##Handle everything related to fishy moving
   def move(self):
     stopped = False
@@ -241,11 +255,19 @@ class School():
       x_speed = 0
       #x = -width if direction == 1 else window_size[0]
       #x = 400
-      x = random.randint(0,window_size[0]-width)
+      if TRAINING_STATE=='TRAIN_X':
+        x = random.randint(0,window_size[0]-width)
+        y = random.randint(200-X_TRAIN_Y_RANGE,200+X_TRAIN_Y_RANGE)
+      elif TRAINING_STATE=='TRAIN_Y':
+        x = 225
+        y = random.randint(0,window_size[1]-height)
+      elif TRAINING_STATE=='TRAIN_XY':
+        x = random.randint(0,window_size[0]-width)
+        y = random.randint(0,window_size[1]-height)
       #x = window_size[0]/2 - width/2
       #y = random.randint(int(-height/2),int(window_size[1]-height/2))
       #y = random.randint(0,int(window_size[1]-height))
-      y = 200
+      
       if fish_eaten > 120:
         color = 'blue'
       elif fish_eaten > 75:

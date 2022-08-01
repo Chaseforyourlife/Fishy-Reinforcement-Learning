@@ -2,7 +2,7 @@ from game import *
 from game_ai import *
 from graph import plot,plot_time
 from variables import *
-
+from collections import deque
 
 
 def main():
@@ -21,7 +21,8 @@ def main():
     plot_time_records = []
     total_time_alive = 0 
     time_record = 0
-    
+    recent_fish_eaten_deque = deque(maxlen=50)
+    plot_recent_fish_eaten_means = []
     main_agent = Agent()
     #draw background
     screen.blit(fishy_background,(0,0))
@@ -37,15 +38,17 @@ def main():
         ###MAIN GAME LOOP AFTER START
         while done == False:
             time_alive += 1
-            #start clock
-            clock.tick(FPS)
+            if SHOW_GAME:
+                #start clock
+                clock.tick(FPS)
+                #draw background
+                screen.blit(fishy_background,(0,0))
             frame_number +=1 
             #update fish_list
             main_school.update()
             #get original_state
             state_old = main_agent.get_state(main_fishy,main_school)
-            #draw background
-            screen.blit(fishy_background,(0,0))
+            
             
             #move fish_list
             main_school.move()
@@ -60,10 +63,11 @@ def main():
             #####TEMPORARY
             if fish_eaten > 0:
                 done = True
-            #draw every fish in the main_school
-            main_school.draw(screen)
-            #draw fishy on the screen
-            main_fishy.draw(screen)
+            if SHOW_GAME:
+                #draw every fish in the main_school
+                main_school.draw(screen)
+                #draw fishy on the screen
+                main_fishy.draw(screen)
             ##End game if fishy reaches 150, break and later check if fishy is alive
             if main_fishy.fish_eaten >= MAX_FISH_SIZE+4:
                 win = True
@@ -91,16 +95,18 @@ def main():
                 main_agent.n_games += 1
                 if main_fishy.fish_eaten >= record:
                     record = main_fishy.fish_eaten
-                    main_agent.model.save()
-                    print('MODEL SAVED')
+                    if not TEST:
+                        main_agent.model.save(main_agent.trainer.optimizer)
+                        print('MODEL SAVED')
                     #print(main_agent.model.parameters())
                 if len(main_agent.memory) >= STARTING_MEMORY:
                     print('TRAIN LONG TERM MEMORY')
                     print('EPSION:',main_agent.epsilon)
-                    main_agent.min_epsilon = .05
+                    main_agent.min_epsilon = END_MIN_EPSILON
                     main_agent.train_long_memory()
                 plot_fish_eatens.append(main_fishy.fish_eaten)
                 total_fish_eaten += main_fishy.fish_eaten
+                recent_fish_eaten_deque.append(main_fishy.fish_eaten)
                 plot_mean_fish_eaten = total_fish_eaten/main_agent.n_games
                 plot_mean_fish_eatens.append(plot_mean_fish_eaten)
                 plot_records.append(record)
@@ -108,10 +114,12 @@ def main():
                     time_record = time_alive
                 plot_time_alives.append(time_alive)
                 total_time_alive += time_alive
+                recent_fish_eaten_mean = sum(recent_fish_eaten_deque)/len(recent_fish_eaten_deque)
                 plot_mean_time_alives.append(total_time_alive/main_agent.n_games)
                 plot_time_records.append(time_record)
-                if main_agent.n_games%1+1 == 1:
-                    plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records)
+                plot_recent_fish_eaten_means.append(recent_fish_eaten_mean)
+                if main_agent.n_games%100+1 == 1:
+                    plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records,plot_recent_fish_eaten_means)
                     plot_time(plot_time_alives,plot_mean_time_alives,plot_time_records)
 
                 

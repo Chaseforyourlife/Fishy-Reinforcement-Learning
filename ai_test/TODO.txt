@@ -1,0 +1,1 @@
+Let the output layer have 9 outputs but only use the diagonals if the variable is true
