@@ -3,7 +3,8 @@ from game_ai import *
 from graph import plot,plot_time
 from variables import *
 from collections import deque
-
+import numpy as np
+from PIL import Image
 
 def main():
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
@@ -126,7 +127,12 @@ def main():
                 print('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)
                 
 
-
+            #print(dir(pygame.display))
+            imgdata = pygame.surfarray.array3d(pygame.display.get_surface())
+            imgdata = imgdata.swapaxes(0,1)
+            img = Image.fromarray(imgdata)
+            print(imgdata) 
+            print(type(imgdata))
             #update screen
             pygame.display.update()
             ##check if window gets closed

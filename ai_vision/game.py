@@ -7,13 +7,13 @@ from variables import *
 #VARIABLES#
 window_size = (550,400)
 LEFT_IMAGES = {
-  'orange':pygame.image.load('../static/images/fishy_left.png'),
+  'orange':pygame.image.load('../static/images/fishy_left_vision.png'),
   'pink':pygame.image.load('../static/images/fishy_left_pink.png'),
   'purple':pygame.image.load('../static/images/fishy_left_purple.png'),
   'blue':pygame.image.load('../static/images/fishy_left_blue.png')
 }
 RIGHT_IMAGES = {
-  'orange':pygame.image.load('../static/images/fishy_right.png'),
+  'orange':pygame.image.load('../static/images/fishy_right_vision.png'),
   'pink':pygame.image.load('../static/images/fishy_right_pink.png'),
   'purple':pygame.image.load('../static/images/fishy_right_purple.png'),
   'blue':pygame.image.load('../static/images/fishy_right_blue.png')
