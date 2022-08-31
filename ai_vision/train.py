@@ -48,7 +48,7 @@ def main():
             #update fish_list
             main_school.update()
             #get original_state
-            state_old = main_agent.get_state(main_fishy,main_school)
+            state_old = main_agent.get_state(pygame)
             
             
             #move fish_list
@@ -81,7 +81,7 @@ def main():
             #calculate reward based on if fishy is alive and if he ate anything
             reward = calculate_reward(main_fishy,main_school,fish_eaten,win,flipped,stopped)
             #get new game state
-            state_new = main_agent.get_state(main_fishy,main_school)
+            state_new = main_agent.get_state(pygame)
             #train short memory
             ###main_agent.train_short_memory(state_old,move,reward,state_new,done)
             #remember
@@ -131,8 +131,8 @@ def main():
             imgdata = pygame.surfarray.array3d(pygame.display.get_surface())
             imgdata = imgdata.swapaxes(0,1)
             img = Image.fromarray(imgdata)
-            print(imgdata) 
-            print(type(imgdata))
+            #print(imgdata) 
+            #print(type(imgdata))
             #update screen
             pygame.display.update()
             ##check if window gets closed

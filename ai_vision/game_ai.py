@@ -7,6 +7,7 @@ from variables import *
 import math
 
 
+from PIL import Image
 
 TELEMETRY = False
 
@@ -73,49 +74,20 @@ class Agent:
         self.gamma = GAMMA   # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
         #TODO: model,trainer
-        self.model = Linear_QNet(INPUT_SIZE,HIDDEN_SIZE,HIDDEN2_SIZE,OUTPUT_SIZE)
+        self.model = Linear_QNet(OUTPUT_SIZE)
         self.trainer = QTrainer(self.model,LEARNING_RATE,GAMMA)
         self.random_moves_remaining = 0
         self.random_move_index = None
         self.model.load()
         if LOAD_OPTIMIZER:
             self.trainer.load()
-    def get_state(self,fishy,school):
+    def get_state(self,pygame):
         #####NORMALIZE INPUTS
         game_state = []
-        
-        #Input Layer Data
-        game_state.append(fishy.x/window_size[0]) #x1
-        game_state.append(fishy.y/window_size[1]) #y1
-        game_state.append((fishy.x + fishy.width)/window_size[0]) #x2
-        game_state.append((fishy.y + fishy.height)/window_size[1]) #y2
-        #game_state.append(fishy.x_speed/10)
-        #game_state.append(fishy.y_speed/10)
-        #Add data for all fish
-        for fish in school.fish_list:
-            #game_state.append((fish.x-fishy.x)/window_size[0])
-            #game_state.append((fish.y-fishy.y)/window_size[1])
-            game_state.append(fish.x/window_size[0]) #x1
-            game_state.append(fish.y/window_size[1]) #y1
-            game_state.append((fish.x + fish.width)/window_size[0]) #x2
-            game_state.append((fish.y + fish.height)/window_size[1]) #y2
-            game_state.append(fish.x_speed/10)
-            game_state.append(fish.fish_eaten>fishy.fish_eaten) #is_bigger
-        #Add data for Map to Fishy
-        #game_state.append(fishy.x) #distance from left 
-        #game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
-        #game_state.append(fishy.y) #distance from up
-        #game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
-        '''
-        #Fishy x and y
-        game_state.append((fishy.x+fishy.width/2)/window_size[0])
-        game_state.append((fishy.y+fishy.height/2)/window_size[1])
-        #fish x and y
-        for fish in school.fish_list:
-            game_state.append((fish.x+fish.width/2)/window_size[0])
-            game_state.append((fish.y+fish.height/2)/window_size[1])
-        '''
-        return np.array(game_state,dtype=float)
+        imgdata = pygame.surfarray.array3d(pygame.display.get_surface())
+        imgdata = imgdata.swapaxes(0,1)
+        #img = Image.fromarray(imgdata)
+        return imgdata/255.0
 
     def remember(self,state,action,reward,next_state,done):
         if TEST:
