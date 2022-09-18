@@ -5,6 +5,7 @@ from collections import deque
 from model import Linear_QNet,QTrainer
 from variables import *
 import math
+import cv2 as cv
 
 
 from PIL import Image
@@ -85,8 +86,12 @@ class Agent:
         #####NORMALIZE INPUTS
         game_state = []
         imgdata = pygame.surfarray.array3d(pygame.display.get_surface())
+        #imgdata=cv.resize(imgdata,dsize=(275,200,3),interpolation=cv.INTER_CUBIC)
         #imgdata = imgdata.swapaxes(0,1)
+        imgdata = cv.resize(imgdata,dsize=(200,275),interpolation=cv.INTER_CUBIC)
+        #get data in correct format
         imgdata = imgdata.swapaxes(0,2)
+        
         #img = Image.fromarray(imgdata)
         return imgdata/255.0
 
