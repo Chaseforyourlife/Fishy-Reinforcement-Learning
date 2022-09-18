@@ -7,13 +7,15 @@ from variables import *
 #VARIABLES#
 window_size = (550,400)
 LEFT_IMAGES = {
-  'orange':pygame.image.load('../static/images/fishy_left_vision.png'),
+  'orange':pygame.image.load('../static/images/fishy_left.png'),
+  'yellow':pygame.image.load('../static/images/fishy_left_vision.png'),
   'pink':pygame.image.load('../static/images/fishy_left_pink.png'),
   'purple':pygame.image.load('../static/images/fishy_left_purple.png'),
   'blue':pygame.image.load('../static/images/fishy_left_blue.png')
 }
 RIGHT_IMAGES = {
-  'orange':pygame.image.load('../static/images/fishy_right_vision.png'),
+  'orange':pygame.image.load('../static/images/fishy_right.png'),
+  'yellow':pygame.image.load('../static/images/fishy_right_vision.png'),
   'pink':pygame.image.load('../static/images/fishy_right_pink.png'),
   'purple':pygame.image.load('../static/images/fishy_right_purple.png'),
   'blue':pygame.image.load('../static/images/fishy_right_blue.png')
@@ -275,7 +277,7 @@ class School():
       elif fish_eaten > 30:
         color = 'pink'
       else:
-        color = 'orange'
+        color = 'yellow'
       new_fish = Fish(width,height,x,y,direction,x_speed,fish_eaten,color=color)
       self.fish_list.append(new_fish)
 
