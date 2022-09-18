@@ -85,7 +85,8 @@ class Agent:
         #####NORMALIZE INPUTS
         game_state = []
         imgdata = pygame.surfarray.array3d(pygame.display.get_surface())
-        imgdata = imgdata.swapaxes(0,1)
+        #imgdata = imgdata.swapaxes(0,1)
+        imgdata = imgdata.swapaxes(0,2)
         #img = Image.fromarray(imgdata)
         return imgdata/255.0
 
@@ -135,7 +136,7 @@ class Agent:
         #get empty list of 0s to replace with move
         move = [0,0,0,0,0,0,0,0,0]
         
-        
+        state = np.array(state)
         #Could change what goes into the randint max
         if self.random_moves_remaining > 0:
             printt('KEEP RANDOM')

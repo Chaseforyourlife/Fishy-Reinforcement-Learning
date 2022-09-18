@@ -17,22 +17,42 @@ def printt(*strings):
 class Linear_QNet(nn.Module):
     def __init__(self,output_size):
         super().__init__()
+        self.pool1 = nn.MaxPool2d(11,8)
+        self.pool2 = nn.MaxPool2d(2, 2)
+        self.pool3 = nn.MaxPool2d(2, 2)
         self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc1 = nn.Linear(2016, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 32)
         self.fc4 = nn.Linear(32, output_size)
         self.load()
     def forward(self,x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = torch.flatten(x, 1) # flatten all dimensions except batch
+        print("FORWARD")
+        print(x.shape)
+        x = self.pool1(x)
+        print(x.shape)
+        x = self.pool2(F.relu(self.conv1(x)))
+        #x = (F.relu(self.conv1(x)))
+        print(x.shape)
+        x = self.pool3(F.relu(self.conv2(x)))
+        #x = (F.relu(self.conv2(x)))
+        #print(x.shape)
+        #x = self.pool(F.relu(self.conv3(x)))
+        print(x.shape)
+        if len(x.shape)==4:
+            x = torch.flatten(x, 1) # flatten all dimensions except batch
+        else:
+            x = torch.flatten(x)
+        print(x.shape)
         x = F.relu(self.fc1(x))
+        print(x.shape)
         x = F.relu(self.fc2(x))
+        print(x.shape)
         x = F.relu(self.fc3(x))
+        print(x.shape)
         x = self.fc4(x)
+        print(x.shape)
         return x
 
     def save(self,optimizer,file_name = 'model.pth'):
