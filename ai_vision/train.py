@@ -6,6 +6,16 @@ from collections import deque
 import numpy as np
 from PIL import Image
 
+
+print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
+print(f"CUDA version: {torch.version.cuda}")
+  
+# Storing ID of current CUDA device
+cuda_id = torch.cuda.current_device()
+print(f"ID of current CUDA device:{torch.cuda.current_device()}")
+        
+print(f"Name of current CUDA device:{torch.cuda.get_device_name(cuda_id)}")
+
 def main():
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
   clock = pygame.time.Clock()
@@ -39,6 +49,8 @@ def main():
         ###MAIN GAME LOOP AFTER START
         while done == False:
             time_alive += 1
+            #if TEST:
+                
             if SHOW_GAME:
                 #start clock
                 clock.tick(FPS)
@@ -102,7 +114,7 @@ def main():
                     #print(main_agent.model.parameters())
                 if len(main_agent.memory) >= STARTING_MEMORY:
                     print('TRAIN LONG TERM MEMORY')
-                    print('EPSION:',main_agent.epsilon)
+                    print('EPSILON:',main_agent.epsilon)
                     main_agent.min_epsilon = END_MIN_EPSILON
                     main_agent.train_long_memory()
                 plot_fish_eatens.append(main_fishy.fish_eaten)
@@ -119,7 +131,8 @@ def main():
                 plot_mean_time_alives.append(total_time_alive/main_agent.n_games)
                 plot_time_records.append(time_record)
                 plot_recent_fish_eaten_means.append(recent_fish_eaten_mean)
-                if main_agent.n_games%100+1 == 1:
+                if main_agent.n_games%100 == 1:
+                    print(plot_fish_eatens,plot_mean_fish_eatens,plot_records,plot_recent_fish_eaten_means)
                     plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records,plot_recent_fish_eaten_means)
                     plot_time(plot_time_alives,plot_mean_time_alives,plot_time_records)
 

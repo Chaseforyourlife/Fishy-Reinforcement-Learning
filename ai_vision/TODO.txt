@@ -1,1 +1,7 @@
-Grayscale
+Grayscale Image
+Resize Image
+shrink model size
+read paper
+change number of filters
+train XY
+Increase memory somehow
