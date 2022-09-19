@@ -95,7 +95,7 @@ def main():
             #get new game state
             state_new = main_agent.get_state(pygame)
             #train short memory
-            ###main_agent.train_short_memory(state_old,move,reward,state_new,done)
+            #main_agent.train_short_memory(state_old,move,reward,state_new,done)
             #remember
             '''
             if frame_number%FRAME_FREQUENCY == 0:
