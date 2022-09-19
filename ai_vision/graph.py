@@ -1,3 +1,4 @@
+from statistics import mean
 import matplotlib.pyplot as plt
 from IPython import display
 
@@ -12,6 +13,7 @@ def plot(fish_eatens, mean_fish_eatens,records,fish_deque):
     plt.ylabel('Fish Eaten')
     plt.plot(fish_eatens)
     plt.plot(mean_fish_eatens)
+    print(mean_fish_eatens[-1])
     plt.plot(records)
     plt.plot(fish_deque)
     plt.ylim(ymin=0)

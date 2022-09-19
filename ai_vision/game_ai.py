@@ -57,8 +57,10 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped):
         #reward -= 1
         pass
     else:
-        reward -= 50
-    reward += fish_eaten*10
+        if REWARD_EAT:
+            reward -= 50
+    if REWARD_EAT:
+        reward += fish_eaten*10
     if win:
         #reward += 1000
         pass
@@ -132,7 +134,7 @@ class Agent:
         #printt('MEMORY:',self.memory)
         #mini_sample = self.memory
         states,actions,rewards,next_states,dones = zip(*mini_sample)
-        self.trainer.train_step(states,actions,rewards,next_states,dones)
+        self.trainer.train_step(np.array(states),actions,rewards,np.array(next_states),dones)
     
     
     def get_action(self,state):

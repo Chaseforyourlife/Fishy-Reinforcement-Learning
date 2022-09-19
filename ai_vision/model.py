@@ -18,24 +18,28 @@ class Linear_QNet(nn.Module):
     def __init__(self,output_size):
         super().__init__()
         self.pool1 = nn.MaxPool2d(11,8)
-        self.pool2 = nn.MaxPool2d(2, 2)
-        self.pool3 = nn.MaxPool2d(2, 2)
+        self.pool2 = nn.MaxPool2d(3, 3)
+        self.pool3 = nn.MaxPool2d(3, 3)
+        self.pool4 = nn.MaxPool2d(3, 3)
         self.conv1 = nn.Conv2d(3, 6, 5)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(240, 120)
-        self.fc2 = nn.Linear(120, 84)
+        self.conv2 = nn.Conv2d(6, 12, 5)
+        self.conv3 = nn.Conv2d(12, 16, 5)
+        self.fc1 = nn.Linear(3456, 160)
+        self.fc2 = nn.Linear(160, 84)
         self.fc3 = nn.Linear(84, 32)
         self.fc4 = nn.Linear(32, output_size)
         self.load()
     def forward(self,x):
         #print("FORWARD")
         #print(x.shape)
-        x = self.pool1(x)
+        #x = self.pool1(x)
+        x.to(DEVICE)
         #print(x.shape)
         x = self.pool2(F.relu(self.conv1(x)))
         #x = (F.relu(self.conv1(x)))
         #print(x.shape)
         x = self.pool3(F.relu(self.conv2(x)))
+        x = self.pool4(F.relu(self.conv3(x)))
         #x = (F.relu(self.conv2(x)))
         #print(x.shape)
         #x = self.pool(F.relu(self.conv3(x)))
@@ -69,11 +73,11 @@ class Linear_QNet(nn.Module):
         if os.path.exists(file_name):
             checkpoint = torch.load(file_name)
             self.load_state_dict(checkpoint['model_state_dict'])
-           
+
 
 class QTrainer:
     def __init__(self,model,learning_rate,gamma):
-        self.model = model
+        self.model = model.to(DEVICE)
         self.learning_rate = learning_rate
         self.gamma = gamma
         self.optimizer = optim.Adam(model.parameters(),lr=self.learning_rate)
@@ -90,30 +94,31 @@ class QTrainer:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
     def train_step(self,state,action,reward,next_state,done):
-        
+
         state = torch.tensor(state,dtype=torch.float)
         next_state = torch.tensor(next_state,dtype=torch.float)
         action = torch.tensor(action,dtype=torch.float)
         reward = torch.tensor(reward,dtype=torch.float)
-
-        if len(state.shape)==1: # reshape tensors if there only one state is being trained on
+        #print('STATE.shape',state.shape)
+        if len(state.shape)==3: # reshape tensors if there only one state is being trained on
             state = torch.unsqueeze(state, 0)
             next_state = torch.unsqueeze(next_state, 0)
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
-        
+
         ##Predicted Q values with the current state
         pred = self.model(state)
 
         target = pred.clone()
         for index in range(len(done)):
+            #print('reward:',reward)
             printt(action[index])
             printt(reward[index])
             Q_new = reward[index]
             #if not done[index]:
-                #printt('not done')
-                #Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
+            #    printt('not done')
+            #    Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
             Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
             target[index][torch.argmax(action[index]).item()] = Q_new
         ## Q_new reward + gamma * max(next_predicted Q value) -> only do this if not done
