@@ -251,17 +251,21 @@ class School():
       width = 40 + int(fish_eaten*.2 * 5)
       height = 8 + int(fish_eaten*.2 * 1)
       direction = 1 if random.randint(0,1) else -1
-      #x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
-      x_speed = 0
-      #x = -width if direction == 1 else window_size[0]
+      x_speed = random.randrange(MIN_FISH_SPEED,MAX_FISH_SPEED) * direction
+      #x_speed = 0
+      x = -width if direction == 1 else window_size[0]
+      y = random.randint(0,int(window_size[1]-height))
       #x = 400
       if TRAINING_STATE=='TRAIN_X':
+        x_speed = 0
         x = random.randint(0,window_size[0]-width)
         y = random.randint(200-X_TRAIN_Y_RANGE,200+X_TRAIN_Y_RANGE)
       elif TRAINING_STATE=='TRAIN_Y':
+        x_speed = 0
         x = 225
         y = random.randint(0,window_size[1]-height)
       elif TRAINING_STATE=='TRAIN_XY':
+        x_speed = 0
         x = random.randint(0,window_size[0]-width)
         y = random.randint(0,window_size[1]-height)
       #x = window_size[0]/2 - width/2

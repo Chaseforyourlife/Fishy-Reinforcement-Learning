@@ -30,10 +30,11 @@ class Linear_QNet(nn.Module):
         self.fc4 = nn.Linear(32, output_size)
         self.load()
     def forward(self,x):
+        
         #print("FORWARD")
         #print(x.shape)
         #x = self.pool1(x)
-        x.to(DEVICE)
+        
         #print(x.shape)
         x = self.pool2(F.relu(self.conv1(x)))
         #x = (F.relu(self.conv1(x)))
@@ -107,6 +108,7 @@ class QTrainer:
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
 
+        
         ##Predicted Q values with the current state
         pred = self.model(state)
 

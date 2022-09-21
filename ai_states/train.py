@@ -3,7 +3,8 @@ from game_ai import *
 from graph import plot,plot_time
 from variables import *
 from collections import deque
-
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def main():
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
@@ -26,8 +27,10 @@ def main():
     main_agent = Agent()
     #draw background
     screen.blit(fishy_background,(0,0))
-    clock.tick(FPS)
+    if SHOW_GAME:
+        clock.tick(FPS)
     while True:
+        
         ##Initialize train start
         main_fishy = Fishy()
         main_school = School()
@@ -78,11 +81,11 @@ def main():
                 done = True
             ##Ai Events
             #calculate reward based on if fishy is alive and if he ate anything
-            reward = calculate_reward(main_fishy,main_school,fish_eaten,win,flipped,stopped)
+            reward = calculate_reward(main_fishy,main_school,fish_eaten,win,flipped,stopped,state_old)
             #get new game state
             state_new = main_agent.get_state(main_fishy,main_school)
             #train short memory
-            ###main_agent.train_short_memory(state_old,move,reward,state_new,done)
+            #main_agent.train_short_memory(state_old,move,reward,state_new,done)
             #remember
             '''
             if frame_number%FRAME_FREQUENCY == 0:
@@ -91,17 +94,17 @@ def main():
             main_agent.remember(state_old,move,reward,state_new,done)
             #train long memory if done
             if done:
-                print(len(main_agent.memory),'MEMORY')
+                printt(len(main_agent.memory),'MEMORY')
                 main_agent.n_games += 1
                 if main_fishy.fish_eaten >= record:
                     record = main_fishy.fish_eaten
                     if not TEST:
                         main_agent.model.save(main_agent.trainer.optimizer)
-                        print('MODEL SAVED')
+                        printt('MODEL SAVED')
                     #print(main_agent.model.parameters())
                 if len(main_agent.memory) >= STARTING_MEMORY:
-                    print('TRAIN LONG TERM MEMORY')
-                    print('EPSION:',main_agent.epsilon)
+                    printt('TRAIN LONG TERM MEMORY')
+                    printt('EPSION:',main_agent.epsilon)
                     main_agent.min_epsilon = END_MIN_EPSILON
                     main_agent.train_long_memory()
                 plot_fish_eatens.append(main_fishy.fish_eaten)
@@ -118,12 +121,14 @@ def main():
                 plot_mean_time_alives.append(total_time_alive/main_agent.n_games)
                 plot_time_records.append(time_record)
                 plot_recent_fish_eaten_means.append(recent_fish_eaten_mean)
-                if main_agent.n_games%100+1 == 1:
+                if main_agent.n_games%25+1 == 1:
                     plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records,plot_recent_fish_eaten_means)
                     plot_time(plot_time_alives,plot_mean_time_alives,plot_time_records)
+                    print('GAMES:',main_agent.n_games)
+                    print('EPISLON:',main_agent.epsilon)
 
                 
-                print('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)
+                printt('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)
                 
 
 
@@ -133,6 +138,7 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     print(main_fishy.moves_counter)
+                    
                     running = False
                     pygame.quit()
         if main_fishy.alive:

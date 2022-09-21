@@ -1,3 +1,4 @@
+from pickle import TRUE
 from game import *
 from game_ai import *
 from graph import plot,plot_time
@@ -5,7 +6,8 @@ from variables import *
 from collections import deque
 import numpy as np
 from PIL import Image
-
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")

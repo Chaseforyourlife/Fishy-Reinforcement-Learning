@@ -1,3 +1,4 @@
+import re
 import torch
 import random
 import numpy as np
@@ -5,7 +6,7 @@ from collections import deque
 from model import Linear_QNet,QTrainer
 from variables import *
 import math
-
+from itertools import islice
 
 
 TELEMETRY = False
@@ -29,12 +30,12 @@ def printt(*strings):
         for string in strings:
             print(string)
 
-def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped):
+def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     reward = 0
     #get reward based on distance from fish
     for fish in school.fish_list:
-        
-        temp_reward = 25/max(1,math.sqrt((abs(fishy.x-fish.x)**2+abs(fishy.y-fish.y)**2)))
+        #temp_reward = 
+        temp_reward = 250/max(1,math.sqrt((abs(fishy.x-fish.x)**2+abs(fishy.y-fish.y)**2)))
         if fish.fish_eaten>fishy.fish_eaten:
             if REWARD_PROXIMITY:
                 reward+=-1*temp_reward
@@ -55,12 +56,16 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped):
         #reward -= 1
         pass
     else:
-        reward -= 50
-    reward += fish_eaten*10
+        if REWARD_EAT:
+            reward = -10
+    if REWARD_EAT:
+        #reward += fish_eaten*1
+        if fish_eaten:
+            reward=10
     if win:
         #reward += 1000
         pass
-    #print('REWARD',reward)
+    printt('REWARD',reward)
     return reward
 
 
@@ -73,7 +78,7 @@ class Agent:
         self.gamma = GAMMA   # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
         #TODO: model,trainer
-        self.model = Linear_QNet(INPUT_SIZE,HIDDEN_SIZE,HIDDEN2_SIZE,OUTPUT_SIZE)
+        self.model = Linear_QNet(sizes=SIZES)
         self.trainer = QTrainer(self.model,LEARNING_RATE,GAMMA)
         self.random_moves_remaining = 0
         self.random_move_index = None
@@ -132,7 +137,7 @@ class Agent:
             return
         printt('Train_long_memory')
         if self.epsilon > self.min_epsilon:
-            self.epsilon -=.01
+            self.epsilon -=EPSILON_DECREASE
         '''
         if self.epsilon < 1:
             self.epsilon = 0
@@ -145,8 +150,11 @@ class Agent:
         '''
         
         if len(self.memory) > BATCH_SIZE:
-            print('LARGER THAN BATCH SIZE')
+            #printt('LARGER THAN BATCH SIZE')
             mini_sample = random.sample(self.memory,BATCH_SIZE)
+            #random_number = random.randint(0,len(self.memory))
+            #mini_sample = deque(islice(self.memory(random_number,random_number+BATCH_SIZE)))
+            #mini_sample=self.memory
         else:
             mini_sample = self.memory
         
@@ -154,7 +162,8 @@ class Agent:
         #printt('MEMORY:',self.memory)
         #mini_sample = self.memory
         states,actions,rewards,next_states,dones = zip(*mini_sample)
-        self.trainer.train_step(states,actions,rewards,next_states,dones)
+        #print('trainer call')
+        self.trainer.train_step(np.array(states),actions,rewards,np.array(next_states),dones)
     
     
     def get_action(self,state):

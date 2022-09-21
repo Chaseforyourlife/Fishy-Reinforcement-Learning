@@ -77,7 +77,7 @@ class Agent:
         self.gamma = GAMMA   # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
         #TODO: model,trainer
-        self.model = Linear_QNet(OUTPUT_SIZE)
+        self.model = Linear_QNet(OUTPUT_SIZE).to(DEVICE)
         self.trainer = QTrainer(self.model,LEARNING_RATE,GAMMA)
         self.random_moves_remaining = 0
         self.random_move_index = None
