@@ -25,6 +25,7 @@ def main():
     recent_fish_eaten_deque = deque(maxlen=50)
     plot_recent_fish_eaten_means = []
     main_agent = Agent()
+    main_agent.load_models()
     #draw background
     screen.blit(fishy_background,(0,0))
     if SHOW_GAME:

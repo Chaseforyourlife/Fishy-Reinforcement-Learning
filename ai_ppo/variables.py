@@ -50,7 +50,7 @@ SIZES = [INPUT_SIZE,320,160,8,OUTPUT_SIZE]
 
 LOAD_OPTIMIZER = False
 
-TEST = False
+TEST = True
 
 
 if TEST:

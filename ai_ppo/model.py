@@ -24,7 +24,7 @@ class ActorNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(sizes[1],sizes[2]),
             nn.ReLU(),
-            nn.Linear(sizes[2],sizes[3]),
+            nn.Linear(sizes[2],sizes[3]),#SHOULD BE CHANGED to INDEX -1
             nn.Softmax(dim=-1)
         )
         self.optimizer = optim.Adam(self.parameters(),lr=LEARNING_RATE)
