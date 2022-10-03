@@ -1,5 +1,5 @@
 import torch
-SPEED = 10
+SPEED = 5
 FPS = 30#1000 #30
 
 
@@ -15,8 +15,8 @@ SHOW_GAME = False
 
 window_size = (550,400)
 MAX_FISH = 1
-MAX_FISH_SPEED = 2 #6
-MIN_FISH_SPEED = 1 #2
+MAX_FISH_SPEED = 6 #6
+MIN_FISH_SPEED = 2 #2
 MAX_FISH_SIZE = 0 #30 #150
 MIN_FISH_SIZE = -25
 
@@ -54,6 +54,6 @@ TEST = True
 
 
 if TEST:
-    FPS = 300
+    FPS = 60
     SHOW_GAME = True
     LOAD_MODEL=True

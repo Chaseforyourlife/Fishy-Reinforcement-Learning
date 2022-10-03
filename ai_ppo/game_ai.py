@@ -14,10 +14,7 @@ TELEMETRY = False
 
 
 
-if(ALLOW_DIAGONALS):
-    OUTPUT_SIZE = 9
-else:
-    OUTPUT_SIZE = 5
+
 
 RANDOM_MOVE_INDEX = None
 RANDOM_MOVES_REMAINING =  0
@@ -36,7 +33,7 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     for fish in school.fish_list:
         #temp_reward = 
         temp_reward = 250/max(1,math.sqrt((abs(fishy.x-fish.x)**2+abs(fishy.y-fish.y)**2)))
-        if fish.fish_eaten>fishy.fish_eaten:
+        if fish.fish_eaten>=fishy.fish_eaten:
             if REWARD_PROXIMITY:
                 reward+=-1*temp_reward
             pass
@@ -47,7 +44,7 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #print(flipped)
 
     if flipped:
-        #reward -=10
+        #reward -=1
         pass
     if stopped:
         #reward -=10
@@ -115,8 +112,7 @@ class Agent:
         self.n_epochs=NUM_EPOCHS
         self.gae_lambda=GAE_LAMBDA
         self.n_games = 0
-        self.epsilon = EPSILON  # randomness
-        self.min_epsilon = MIN_EPSILON
+    
 
         self.actor=ActorNetwork(SIZES)
         self.critic=CriticNetwork(SIZES)
@@ -240,37 +236,4 @@ class Agent:
                 self.critic.optimzier.step()
             
             self.memory.clear_memory()
-    '''
-    def get_action(self,state):
-        #random moves: tradeoff exporation/exploitation
-        #self.epsilon = STARTING_EPSILON - self.n_games
-        #get empty list of 0s to replace with move
-        move = [0,0,0,0,0,0,0,0,0]
-        
-        
-        #Could change what goes into the randint max
-        if self.random_moves_remaining > 0:
-            printt('KEEP RANDOM')
-            move[self.random_move_index] = 1
-            self.random_moves_remaining -=1 
-        elif random.randrange(0,100)/100 < self.epsilon:
-            printt('RANDOM')
-            if(ALLOW_DIAGONALS):
-                move_index = random.randint(0,8)
-            else:
-                move_index = random.randint(0,4)
-            move[move_index] = 1
-            self.random_move_index = move_index
-            self.random_moves_remaining = RANDOM_MOVES_CONSTANT
-        else:
-            printt('NOT RANDOM')
-            state_tensor = torch.tensor(state,dtype=torch.float)
-            prediction = self.model(state_tensor)   # Calls Forward Function of LinearQModel
-            move_index = torch.argmax(prediction).item()
-            printt('Move_index:',move_index)
-            move[move_index] = 1
-        return move
-    '''
-
-
-
+    

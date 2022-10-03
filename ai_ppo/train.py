@@ -26,10 +26,13 @@ def main():
     plot_recent_fish_eaten_means = []
     main_agent = Agent()
     if LOAD_MODEL:
-        main_agent.load_models()
+        try:
+            main_agent.load_models()
+        except:
+            print('Model Load Failed')
     #draw background
     screen.blit(fishy_background,(0,0))
-    if SHOW_GAME:
+    if SHOW_GAME and FPS!=0:
         clock.tick(FPS)
     n_frames = 0
     while True:
@@ -68,7 +71,7 @@ def main():
             #check if fishy collided with any fish in the main_school
             fish_eaten = main_fishy.check_collide(main_school)
             #####TEMPORARY
-            if fish_eaten > MAX_FISH_CONSUMED:
+            if main_fishy.fish_eaten > MAX_FISH_CONSUMED:
                 done = True
             if SHOW_GAME:
                 #draw every fish in the main_school
@@ -113,13 +116,7 @@ def main():
                         main_agent.save_models()
                         printt('MODEL SAVED')
                     #print(main_agent.model.parameters())
-                ''' 
-                if len(main_agent.memory) >= STARTING_MEMORY:
-                    printt('TRAIN LONG TERM MEMORY')
-                    printt('EPSION:',main_agent.epsilon)
-                    main_agent.min_epsilon = END_MIN_EPSILON
-                    main_agent.train_long_memory()
-                '''
+                
                 #^replace with 
                 main_agent.learn()
 
@@ -137,11 +134,11 @@ def main():
                 plot_mean_time_alives.append(total_time_alive/main_agent.n_games)
                 plot_time_records.append(time_record)
                 plot_recent_fish_eaten_means.append(recent_fish_eaten_mean)
-                if main_agent.n_games%25+1 == 1:
+                if main_agent.n_games%10 == 1:
                     plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records,plot_recent_fish_eaten_means)
                     plot_time(plot_time_alives,plot_mean_time_alives,plot_time_records)
                     print('GAMES:',main_agent.n_games)
-                    print('EPISLON:',main_agent.epsilon)
+                 
 
                 
                 printt('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)
