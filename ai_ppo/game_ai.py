@@ -182,7 +182,7 @@ class Agent:
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
     def get_action(self,observation):
-        state = torch.tensor([observation],dtype=torch.float).to(self.actor.device)
+        state = torch.tensor(np.array([observation]),dtype=torch.float).to(self.actor.device)
         dist=self.actor(state)
         #print('DIST',dist)
         value=self.critic(state)

@@ -25,7 +25,8 @@ def main():
     recent_fish_eaten_deque = deque(maxlen=50)
     plot_recent_fish_eaten_means = []
     main_agent = Agent()
-    main_agent.load_models()
+    if LOAD_MODEL:
+        main_agent.load_models()
     #draw background
     screen.blit(fishy_background,(0,0))
     if SHOW_GAME:
@@ -75,7 +76,7 @@ def main():
                 #draw fishy on the screen
                 main_fishy.draw(screen)
             ##End game if fishy reaches 150, break and later check if fishy is alive
-            if main_fishy.fish_eaten >= MAX_FISH_SIZE+4:
+            if main_fishy.fish_eaten >= MAX_FISH_SIZE+MAX_FISH_CONSUMED:
                 win = True
                 done = True
             if main_fishy.alive == False:
