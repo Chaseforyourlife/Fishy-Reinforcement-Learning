@@ -1,3 +1,4 @@
+from pickle import FRAME
 from game import *
 from game_ai import *
 from graph import plot,plot_time
@@ -84,7 +85,7 @@ def main():
                 done = True
             if main_fishy.alive == False:
                 done = True
-            if time_alive >= FRAME_MAX:
+            if time_alive >= FRAME_MAX and FRAME_MAX!=0:
                 done = True
             ##Ai Events
             #calculate reward based on if fishy is alive and if he ate anything
