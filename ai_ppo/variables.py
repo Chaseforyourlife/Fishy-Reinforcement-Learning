@@ -50,8 +50,8 @@ SIZES = [INPUT_SIZE,320,160,OUTPUT_SIZE]
 
 LOAD_MODEL = True
 
-TEST =True
+TEST =False
 if TEST:
-    FPS = 60
+    FPS = 600
     SHOW_GAME = True
     LOAD_MODEL=True
