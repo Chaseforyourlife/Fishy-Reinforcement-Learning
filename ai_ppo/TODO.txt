@@ -1,1 +1,4 @@
 Let the output layer have 9 outputs but only use the diagonals if the variable is true
+
+
+change game state to reflect distances rather between rather than absolutes

@@ -44,25 +44,25 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #print(flipped)
 
     if flipped:
-        reward -=1
+        reward -=.1
         pass
     if stopped:
-        reward -=1
+        reward -=.1
         pass
     if fishy.alive:
         #reward -= 1
         pass
     else:
         if REWARD_EAT:
-            reward = -10
+            reward -=1
     if REWARD_EAT:
         #reward += fish_eaten*1
         if fish_eaten:
-            reward=10
+            reward+=1
     if win:
         #reward += 1000
         pass
-    printt('REWARD',reward)
+    #print('REWARD',reward)
     return reward
 
 
@@ -148,7 +148,10 @@ class Agent:
             game_state.append((fish.x + fish.width)/window_size[0]) #x2
             game_state.append((fish.y + fish.height)/window_size[1]) #y2
             game_state.append(fish.x_speed/10)
-            game_state.append(fish.fish_eaten>fishy.fish_eaten) #is_bigger
+            game_state.append(float(fish.fish_eaten>fishy.fish_eaten)) #is_bigger
+            game_state.append(fish.width/window_size[0])
+            game_state.append(fish.height/window_size[1])
+        #print(game_state)
         #Add data for Map to Fishy
         #game_state.append(fishy.x) #distance from left 
         #game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right

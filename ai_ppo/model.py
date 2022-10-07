@@ -24,7 +24,9 @@ class ActorNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(sizes[1],sizes[2]),
             nn.ReLU(),
-            nn.Linear(sizes[2],sizes[3]),#SHOULD BE CHANGED to INDEX -1
+            nn.Linear(sizes[2],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
+            #nn.ReLU(),
+            #nn.Linear(sizes[3],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
             nn.Softmax(dim=-1)
         )
         self.optimizer = optim.Adam(self.parameters(),lr=LEARNING_RATE)
@@ -53,6 +55,8 @@ class CriticNetwork(nn.Module):
             nn.Linear(sizes[1],sizes[2]),
             nn.ReLU(),
             nn.Linear(sizes[2],1),
+            #nn.ReLU(),
+            #nn.Linear(sizes[3],1),
         )
         self.optimzier = optim.Adam(self.parameters(),lr=LEARNING_RATE)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
