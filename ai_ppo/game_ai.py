@@ -32,7 +32,7 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #get reward based on distance from fish
     for fish in school.fish_list:
         #temp_reward = 
-        temp_reward = 250/max(1,math.sqrt((abs(fishy.x-fish.x)**2+abs(fishy.y-fish.y)**2)))
+        temp_reward = 2.5/max(1,math.sqrt((abs(fishy.x-fish.x)**2+abs(fishy.y-fish.y)**2)))
         if fish.fish_eaten>=fishy.fish_eaten:
             if REWARD_PROXIMITY:
                 reward+=-1*temp_reward
@@ -131,26 +131,55 @@ class Agent:
     def get_state(self,fishy,school):
         #####NORMALIZE INPUTS
         game_state = []
-        
-        #Input Layer Data
-        game_state.append(fishy.x/window_size[0]) #x1
-        game_state.append(fishy.y/window_size[1]) #y1
+        #distances from sides
+        game_state.append(fishy.x/window_size[0]) #distance from left 
+        game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
+        game_state.append(fishy.y/window_size[1]) #distance from up
+        game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
+        #Input Layer Data, input about fishy
+        #game_state.append(fishy.x/window_size[0]) #x1
+        #game_state.append(fishy.y/window_size[1]) #y1
         game_state.append((fishy.x + fishy.width)/window_size[0]) #x2
         game_state.append((fishy.y + fishy.height)/window_size[1]) #y2
         #game_state.append(fishy.x_speed/10)
         #game_state.append(fishy.y_speed/10)
         #Add data for all fish
         for fish in school.fish_list:
+            #RELATIVE POSITIONS
             #game_state.append((fish.x-fishy.x)/window_size[0])
             #game_state.append((fish.y-fishy.y)/window_size[1])
+            x_dis = None
+            if fish.x > fishy.x+fishy.width:
+                #right of fishy
+                x_dis = fish.x - (fishy.x+fishy.width)
+            elif fish.x+fish.width < fishy.x:
+                #left of fishy (negative)
+                x_dis = (fish.x+fish.width) - fishy.x
+            else:
+                x_dis = 0.0
+            y_dis = None
+            if fish.y > fishy.y+fishy.height:
+                #below fishy
+                y_dis = fish.y - (fishy.y+fishy.height) 
+            elif fish.y+fish.height < fishy.y:
+                #above fishy (negative)
+                y_dis = (fish.y+fish.height) - fishy.y
+            else:
+                y_dis = 0.0
+            game_state.append(x_dis/window_size[0])
+            game_state.append(y_dis/window_size[1])
+            #^RELATIVE POSITIONS
+            #ABSOLUTE POSITIONS
             game_state.append(fish.x/window_size[0]) #x1
             game_state.append(fish.y/window_size[1]) #y1
-            game_state.append((fish.x + fish.width)/window_size[0]) #x2
-            game_state.append((fish.y + fish.height)/window_size[1]) #y2
+            #game_state.append((fish.x + fish.width)/window_size[0]) #x2
+            #game_state.append((fish.y + fish.height)/window_size[1]) #y2
             game_state.append(fish.x_speed/10)
+            # need 2 nodes, can't use one node because seperate actions need to occur for both smaller and bigger
             game_state.append(float(fish.fish_eaten>fishy.fish_eaten)) #is_bigger
-            game_state.append(fish.width/window_size[0])
-            game_state.append(fish.height/window_size[1])
+            game_state.append(float(fish.fish_eaten<=fishy.fish_eaten)) #is_smaller
+            #game_state.append(fish.width/window_size[0])
+            #game_state.append(fish.height/window_size[1])
         #print(game_state)
         #Add data for Map to Fishy
         #game_state.append(fishy.x) #distance from left 
@@ -166,6 +195,7 @@ class Agent:
             game_state.append((fish.x+fish.width/2)/window_size[0])
             game_state.append((fish.y+fish.height/2)/window_size[1])
         '''
+        #print(game_state)
         return np.array(game_state,dtype=float)
 
     def remember(self,state,action,prob,val,reward,done):

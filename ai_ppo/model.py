@@ -21,9 +21,9 @@ class ActorNetwork(nn.Module):
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
         self.actor = nn.Sequential(
             nn.Linear(sizes[0],sizes[1]),
-            nn.ReLU(),
+            #nn.ReLU(),
             nn.Linear(sizes[1],sizes[2]),
-            nn.ReLU(),
+            #nn.ReLU(),
             nn.Linear(sizes[2],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
             #nn.ReLU(),
             #nn.Linear(sizes[3],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
@@ -51,9 +51,9 @@ class CriticNetwork(nn.Module):
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
         self.critic = nn.Sequential(
             nn.Linear(sizes[0],sizes[1]),
-            nn.ReLU(),
+            #nn.ReLU(),
             nn.Linear(sizes[1],sizes[2]),
-            nn.ReLU(),
+            #nn.ReLU(),
             nn.Linear(sizes[2],1),
             #nn.ReLU(),
             #nn.Linear(sizes[3],1),

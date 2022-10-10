@@ -30,8 +30,12 @@ class Fishy:
     self.moves_counter = collections.Counter()
     self.width = 40
     self.height = 8 
+    
     self.x = 225
     self.y = 200
+    if RANDOM_START:
+      self.x = random.randint(0,window_size[0]-self.width)
+      self.y = random.randint(0,window_size[1]-self.height)
     self.direction = 1
     self.x_speed = 0
     self.y_speed = 0
@@ -271,8 +275,12 @@ class School():
         y = random.randint(0,window_size[1]-height)
       elif TRAINING_STATE=='TRAIN_XY':
         x_speed = 0
-        x = random.randint(0,window_size[0]-width)
-        y = random.randint(0,window_size[1]-height)
+        if XY_TRAIN_RANGE > 0:
+          x = random.randint(window_size[0]/2-XY_TRAIN_RANGE,window_size[0]/2+XY_TRAIN_RANGE)
+          y = random.randint(window_size[1]/2-XY_TRAIN_RANGE,window_size[1]/2+XY_TRAIN_RANGE)
+        else:
+          x = random.randint(0,window_size[0]-width)
+          y = random.randint(0,window_size[1]-height)
       #x = window_size[0]/2 - width/2
       #y = random.randint(int(-height/2),int(window_size[1]-height/2))
       #y = random.randint(0,int(window_size[1]-height))
