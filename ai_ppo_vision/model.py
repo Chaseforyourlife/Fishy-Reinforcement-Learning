@@ -15,37 +15,21 @@ def printt(*strings):
             print(string)
 
 
+conv_base = 
+
 class ActorNetwork(nn.Module):
     def __init__(self,sizes):
         super(ActorNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
-        if len(SIZES) == 3:
-            self.actor = nn.Sequential(
-                nn.Linear(sizes[0],sizes[1]),
-                nn.ReLU(),
-                nn.Linear(sizes[1],sizes[-1]),
-                nn.Softmax(dim=-1)
-            )
-        elif len(SIZES) == 4:
-            self.actor = nn.Sequential(
-                nn.Linear(sizes[0],sizes[1]),
-                nn.ReLU(),
-                nn.Linear(sizes[1],sizes[2]),
-                nn.ReLU(),
-                nn.Linear(sizes[2],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
-                nn.Softmax(dim=-1)
-            )
-        elif len(SIZES) == 5:
-            self.actor = nn.Sequential(
-                nn.Linear(sizes[0],sizes[1]),
-                nn.ReLU(),
-                nn.Linear(sizes[1],sizes[2]),
-                nn.ReLU(),
-                nn.Linear(sizes[2],sizes[3]),#SHOULD BE CHANGED to INDEX -1
-                nn.ReLU(),
-                nn.Linear(sizes[3],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
-                nn.Softmax(dim=-1)
-            )
+        self.actor = nn.Sequential(
+            nn.Conv2d(window_size[0]*window_size[1], 32, 3, stride=2, padding=1),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Linear(32 * 6 * 6, 512),
+            nn.Linear(512, SIZES[-1]),
+            nn.Softmax(dim=-1)
+        )
         self.optimizer = optim.Adam(self.parameters(),lr=LEARNING_RATE)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
@@ -66,30 +50,15 @@ class CriticNetwork(nn.Module):
     def __init__(self,sizes):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
-        if len(SIZES)==3:
-            self.critic = nn.Sequential(
-                nn.Linear(sizes[0],sizes[1]),
-                nn.ReLU(),
-                nn.Linear(sizes[1],1),
-            )
-        elif len(SIZES)==4:
-            self.critic = nn.Sequential(
-                nn.Linear(sizes[0],sizes[1]),
-                nn.ReLU(),
-                nn.Linear(sizes[1],sizes[2]),
-                nn.ReLU(),
-                nn.Linear(sizes[2],1),
-            )
-        elif len(SIZES)==5:
-            self.critic = nn.Sequential(
-                nn.Linear(sizes[0],sizes[1]),
-                nn.ReLU(),
-                nn.Linear(sizes[1],sizes[2]),
-                nn.ReLU(),
-                nn.Linear(sizes[2],sizes[3]),
-                nn.ReLU(),
-                nn.Linear(sizes[3],1),
-            )
+        self.critic = nn.Sequential(
+            nn.Conv2d(window_size[0]*window_size[1], 32, 3, stride=2, padding=1)
+            nn.Conv2d(32, 32, 3, stride=2, padding=1)
+            nn.Conv2d(32, 32, 3, stride=2, padding=1)
+            nn.Conv2d(32, 32, 3, stride=2, padding=1)
+            nn.Linear(32 * 6 * 6, 512)
+            nn.Linear(512, 1)
+        )
+        
         self.optimzier = optim.Adam(self.parameters(),lr=LEARNING_RATE)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
