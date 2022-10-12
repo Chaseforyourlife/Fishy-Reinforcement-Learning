@@ -5,9 +5,13 @@ from graph import plot,plot_time
 from variables import *
 from collections import deque
 import os
+import optuna
+from optuna.trial import TrialState
+
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
-def main():
+
+def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
   clock = pygame.time.Clock()
   running = True
@@ -25,7 +29,8 @@ def main():
     time_record = 0
     recent_fish_eaten_deque = deque(maxlen=50)
     plot_recent_fish_eaten_means = []
-    main_agent = Agent()
+    main_agent = Agent(trial)
+    print(main_agent.critic.critic)
     if LOAD_MODEL:
         try:
             main_agent.load_models()
@@ -36,8 +41,9 @@ def main():
     if SHOW_GAME and FPS!=0:
         clock.tick(FPS)
     n_frames = 0
-    while True:
-        
+    max_game_count = 1
+    while max_game_count != max_game_limit+1 or max_game_limit==0:
+        max_game_count+=1
         ##Initialize train start
         main_fishy = Fishy()
         main_school = School()
@@ -167,8 +173,35 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
+    running=False
+    print(f'Average Fish Eaten: {plot_mean_fish_eatens[-1]}')
+    print(f'Recent Average Fish Eaten: {plot_recent_fish_eaten_means[-1]}')
+    #return plot_recent_fish_eaten_means[-1]
+    if OPTUNA_MIN_MAX=='maximum':
+        return plot_mean_fish_eatens[-1]
+    elif OPTUNA_MIN_MAX=='minimum':
+        return plot_mean_time_alives[-1]
 
+if __name__ == '__main__':
+    if OPTUNA:
+        study = optuna.create_study(direction=OPTUNA_MIN_MAX) # 'maximize' or 'maximize'
+        objective = main
+        study.optimize(objective,n_trials=OPTUNA_NUM_TRIALS)
+        pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+        complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
+        print("Study statistics: ")
+        print("  Number of finished trials: ", len(study.trials))
+        print("  Number of pruned trials: ", len(pruned_trials))
+        print("  Number of complete trials: ", len(complete_trials))
 
+        print("Best trial:")
+        trial = study.best_trial
 
-main()
+        print("  Value: ", trial.value)
+
+        print("  Params: ")
+        for key, value in trial.params.items():
+            print("    {}: {}".format(key, value))
+    else:
+        main()

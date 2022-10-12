@@ -67,14 +67,17 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
 
 
 class PPOMemory:
-    def __init__(self,batch_size):
+    def __init__(self,batch_size,trial=None):
         self.states=[]
         self.probs=[]
         self.vals=[]
         self.actions=[]
         self.rewards=[]
         self.dones=[]
-        self.batch_size=batch_size
+        if OPTUNA and OPTUNA_BATCH_SIZE:
+            self.batch_size=trial.suggest_int("batch_size",OPTUNA_BATCH_SIZE[0],OPTUNA_BATCH_SIZE[1],log=True)
+        else:
+            self.batch_size=batch_size
     def generate_batches(self):
         n_states=len(self.states)
         batch_start = np.arange(0,n_states,self.batch_size)
@@ -106,17 +109,23 @@ class PPOMemory:
 
 
 class Agent:
-    def __init__(self):
-        self.gamma=GAMMA # discount rate
+    def __init__(self,trial=None):
+        if OPTUNA and OPTUNA_GAMMA:
+            self.gamma= trial.suggest_float("gamma",OPTUNA_GAMMA[0],OPTUNA_GAMMA[1],log=True)
+        else:    
+            self.gamma=GAMMA # discount rate
         self.policy_clip=POLICY_CLIP
-        self.n_epochs=NUM_EPOCHS
+        if OPTUNA and OPTUNA_EPOCHS:
+            self.n_epochs=trial.suggest_int("epochs",OPTUNA_EPOCHS[0],OPTUNA_EPOCHS[1],log=True)
+        else:
+            self.n_epochs=NUM_EPOCHS
         self.gae_lambda=GAE_LAMBDA
         self.n_games = 0
-    
+        self.trial = trial
 
-        self.actor=ActorNetwork(SIZES)
-        self.critic=CriticNetwork(SIZES)
-        self.memory=PPOMemory(BATCH_SIZE)
+        self.actor=ActorNetwork(SIZES,trial)
+        self.critic=CriticNetwork(SIZES,trial)
+        self.memory=PPOMemory(BATCH_SIZE,trial)
 
 
         #self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
