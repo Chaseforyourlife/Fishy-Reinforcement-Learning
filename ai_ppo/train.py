@@ -177,9 +177,9 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
     print(f'Average Fish Eaten: {plot_mean_fish_eatens[-1]}')
     print(f'Recent Average Fish Eaten: {plot_recent_fish_eaten_means[-1]}')
     #return plot_recent_fish_eaten_means[-1]
-    if OPTUNA_MIN_MAX=='maximum':
+    if OPTUNA_MIN_MAX=='maximize':
         return plot_mean_fish_eatens[-1]
-    elif OPTUNA_MIN_MAX=='minimum':
+    elif OPTUNA_MIN_MAX=='minimize':
         return plot_mean_time_alives[-1]
 
 if __name__ == '__main__':
