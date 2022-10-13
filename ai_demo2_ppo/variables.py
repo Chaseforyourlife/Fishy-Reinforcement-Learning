@@ -20,7 +20,7 @@ if TRAINING_STATE == 'TRAIN_XY':
 
 window_size = (550,400)
 MAX_FISH = 1
-MAX_FISH_SPEED = 6 #6
+MAX_FISH_SPEED = 5 #6
 MIN_FISH_SPEED = 2 #2
 MAX_FISH_SIZE = 0#150 #30 #150
 MIN_FISH_SIZE = -25
@@ -73,8 +73,9 @@ if OPTUNA:
     MAX_GAME_LIMIT = 200
     LOAD_MODEL=False
 
-TEST =False
+TEST =True
 if TEST:
+    OPTUNA = False
     FPS = 60
     SHOW_GAME = True
     LOAD_MODEL=True
