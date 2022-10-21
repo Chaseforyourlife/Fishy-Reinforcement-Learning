@@ -3,7 +3,7 @@ import torch
 SPEED = 5
 FPS = 0#60#1000 #30
 MAX_GAME_LIMIT=0
-
+SAVE_MODEL = True
 
 
 ALLOW_DIAGONALS=False
@@ -22,7 +22,7 @@ window_size = (550,400)
 MAX_FISH = 1
 MAX_FISH_SPEED = 6 #6
 MIN_FISH_SPEED = 2 #2
-MAX_FISH_SIZE = 0#150 #30 #150
+MAX_FISH_SIZE = 25#150 #30 #150
 MIN_FISH_SIZE = -25
 
 MAX_FISH_CONSUMED = MAX_FISH_SIZE+5
@@ -33,15 +33,15 @@ N=20
 GAE_LAMBDA = .95
 POLICY_CLIP = .2
 NUM_EPOCHS=1 # try 10 and 5?
-BATCH_SIZE = 60
+BATCH_SIZE = 15
 
 
-GAMMA = .97 #0.90 # must be less than 1, originally .99
+GAMMA = .975 #0.90 # must be less than 1, originally .99
 
 REWARD_PROXIMITY=False
 REWARD_EAT=True
 
-LEARNING_RATE = .0003#.01#.0003#.0003#.0003#.001
+LEARNING_RATE = .0006#.01#.0003#.0003#.0003#.001
 
 
 INPUT_SIZE = 4+MAX_FISH*6# 6+2+MAX_FISH*8
@@ -54,15 +54,16 @@ SIZES = [INPUT_SIZE,1000,1000,OUTPUT_SIZE]
 
 LOAD_MODEL = True
 
-
+#default optimizer is Adam
 
 ###OPTUNA VARIBALES
 OPTUNA = False
 OPTUNA_MIN_MAX = 'minimize' # 'minimize' or 'maximize'
-OPTUNA_NUM_TRIALS = 100
+OPTUNA_NUM_TRIALS = 25
 
-OPTUNA_MODEL = False # [[1,3][10,1000]]
-OPTUNA_LR = False # [.00001,.001] example used .0003
+#switch to test for list?
+OPTUNA_MODEL =  [[1,3],[10,1000]]
+OPTUNA_LR =  False # [.00001,.001] #example used .0003
 OPTUNA_GAMMA = False # [.90,.99]
 OPTUNA_BATCH_SIZE = False # [10,1000]
 OPTUNA_OPTIM = False # ["Adam","RMSprop","SGD"]
@@ -70,6 +71,7 @@ OPTUNA_EPOCHS = False # [1,30]
 OPTUNA_DROPOUT = False # [.2,.5]
 
 if OPTUNA:
+    SAVE_MODEL=False
     MAX_GAME_LIMIT = 200
     LOAD_MODEL=False
 

@@ -216,9 +216,10 @@ class Agent:
             return
         self.memory.store_memory(state,action,prob,val,reward,done)
     def save_models(self):
-        print('... saving models ...')
-        self.actor.save_checkpoint()
-        self.critic.save_checkpoint()
+        if SAVE_MODEL:
+            print('... saving models ...')
+            self.actor.save_checkpoint()
+            self.critic.save_checkpoint()
     def load_models(self):
         print('... loading models ...')
         self.actor.load_checkpoint()
