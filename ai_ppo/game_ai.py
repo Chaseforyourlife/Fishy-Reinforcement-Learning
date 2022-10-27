@@ -44,21 +44,21 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #print(flipped)
 
     if flipped:
-        reward -=.2
+        reward -=2
         pass
     if stopped:
-        reward -=.2
+        reward -=2
         pass
     if fishy.alive:
         #reward -= 1
         pass
     else:
         if REWARD_EAT:
-            reward -=1
+            reward -=10
     if REWARD_EAT:
         #reward += fish_eaten*1
         if fish_eaten:
-            reward+=1
+            reward+=5
     if win:
         #reward += 1000
         pass
@@ -142,10 +142,10 @@ class Agent:
         game_state = []
         #distances from sides
         if RELATIVE_STATES:
-        game_state.append(fishy.x/window_size[0]) #distance from left 
-        game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
-        game_state.append(fishy.y/window_size[1]) #distance from up
-        game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
+            game_state.append(fishy.x/window_size[0]) #distance from left 
+            game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
+            game_state.append(fishy.y/window_size[1]) #distance from up
+            game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
         #Input Layer Data, input about fishy
         else:
             game_state.append(fishy.x/window_size[0]) #x1
@@ -158,31 +158,31 @@ class Agent:
         for fish in school.fish_list:
             #RELATIVE POSITIONS
             if RELATIVE_STATES:
-            #game_state.append((fish.x-fishy.x)/window_size[0])
-            #game_state.append((fish.y-fishy.y)/window_size[1])
-            
-            x_dis = None
-            if fish.x > fishy.x+fishy.width:
-                #right of fishy
-                x_dis = fish.x - (fishy.x+fishy.width)
-            elif fish.x+fish.width < fishy.x:
-                #left of fishy (negative)
-                x_dis = (fish.x+fish.width) - fishy.x
-            else:
-                x_dis = 0.0
-            y_dis = None
-            if fish.y > fishy.y+fishy.height:
-                #below fishy
-                y_dis = fish.y - (fishy.y+fishy.height) 
-            elif fish.y+fish.height < fishy.y:
-                #above fishy (negative)
-                y_dis = (fish.y+fish.height) - fishy.y
-            else:
-                y_dis = 0.0
-            game_state.append(x_dis/window_size[0])
-            game_state.append(y_dis/window_size[1])
-            #^RELATIVE POSITIONS
-            
+                #game_state.append((fish.x-fishy.x)/window_size[0])
+                #game_state.append((fish.y-fishy.y)/window_size[1])
+                
+                x_dis = None
+                if fish.x > fishy.x+fishy.width:
+                    #right of fishy
+                    x_dis = fish.x - (fishy.x+fishy.width)
+                elif fish.x+fish.width < fishy.x:
+                    #left of fishy (negative)
+                    x_dis = (fish.x+fish.width) - fishy.x
+                else:
+                    x_dis = 0.0
+                y_dis = None
+                if fish.y > fishy.y+fishy.height:
+                    #below fishy
+                    y_dis = fish.y - (fishy.y+fishy.height) 
+                elif fish.y+fish.height < fishy.y:
+                    #above fishy (negative)
+                    y_dis = (fish.y+fish.height) - fishy.y
+                else:
+                    y_dis = 0.0
+                game_state.append(x_dis/window_size[0])
+                game_state.append(y_dis/window_size[1])
+                #^RELATIVE POSITIONS
+                
             #ABSOLUTE POSITIONS
             else:
                 game_state.append(fish.x/window_size[0]) #x1
@@ -246,21 +246,33 @@ class Agent:
         return action,probs,value
     def learn(self):
         for _ in range(self.n_epochs):
+            printt('Starting Epoch')
             state_arr,action_arr,old_probs_arr,vals_arr,reward_arr,done_arr,batches=self.memory.generate_batches()
             
             values = vals_arr
             advantage=np.zeros(len(reward_arr),dtype=np.float32)
 
+            #Loop through total timesteps
             for t in range(len(reward_arr)-1):
                 discount=1
                 a_t = 0
+                timesteps=0
                 for k in range(t,len(reward_arr)-1):
+                    if timesteps >=TIMESTEPS_PER_ITERATION:
+                        break
                     a_t += discount*(reward_arr[k]+self.gamma*values[k+1]*(1-int(done_arr[k]))-values[k])
                     discount *= self.gamma*self.gae_lambda
+                    timesteps+=1
+                
                 advantage[t] = a_t
+            ###NORMALIZE REWARDS???
+            #advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10)
+            ###^Not in original
             advantage = torch.tensor(advantage).to(self.actor.device)
             values = torch.tensor(values).to(self.actor.device)
-            for batch in batches:
+            printt('Batches Ready')
+            for count,batch in enumerate(batches):
+                printt(f'Batch {count}')
                 states = torch.tensor(state_arr[batch],dtype=torch.float).to(self.actor.device)
                 old_probs = torch.tensor(old_probs_arr[batch]).to(self.actor.device)
                 actions = torch.tensor(action_arr[batch]).to(self.actor.device)

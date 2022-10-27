@@ -1,8 +1,14 @@
+
+from urllib.parse import MAX_CACHE_SIZE
+from variables import *
+
+
 from pickle import FRAME
 from game import *
 from game_ai import *
 from graph import plot,plot_time
-from variables import *
+
+
 from collections import deque
 import os
 import cProfile
@@ -13,6 +19,8 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
+  MAX_FISH_SIZE = 0
+  MAX_FISH_CONSUMED = MAX_FISH_SIZE+5
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
   clock = pygame.time.Clock()
   running = True
@@ -64,7 +72,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                 screen.blit(fishy_background,(0,0))
             frame_number +=1 
             #update fish_list
-            main_school.update()
+            main_school.update(max_fish_size=MAX_FISH_SIZE)
             #get original_state
             state_old = main_agent.get_state(main_fishy,main_school)
         
@@ -113,7 +121,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             #train long memory if done
 
             if done:
-
+                
 
 
 
@@ -128,8 +136,9 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                     #print(main_agent.model.parameters())
                 
                 #^replace with 
+                
                 main_agent.learn()
-
+                
                 plot_fish_eatens.append(main_fishy.fish_eaten)
                 total_fish_eaten += main_fishy.fish_eaten
                 recent_fish_eaten_deque.append(main_fishy.fish_eaten)
@@ -148,7 +157,13 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                     plot(plot_fish_eatens,plot_mean_fish_eatens,plot_records,plot_recent_fish_eaten_means)
                     plot_time(plot_time_alives,plot_mean_time_alives,plot_time_records)
                     print('GAMES:',main_agent.n_games)
-                 
+                
+                #AUTOMATICALLY INCREASE FISH SIZE
+                if TRAINING_STATE=='MOVE':
+                    #if recent_fish_eaten_mean>=MAX_FISH_CONSUMED-1 and main_agent.n_games>=50:
+                    if record>=MAX_FISH_CONSUMED and main_agent.n_games>=50:
+                        MAX_FISH_SIZE+=1
+                        MAX_FISH_CONSUMED+=1
 
                 
                 printt('Game:',main_agent.n_games,'Fish Eaten:',main_fishy.fish_eaten,'Record:',record)

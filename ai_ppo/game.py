@@ -232,12 +232,12 @@ class School():
   def __init__(self):
     self.fish_list = []
   
-  def update(self):
+  def update(self,max_fish_size):
     #move all existing fish
     #remove fish beyond boundaries 
     #add new fish randomly
     self.check_clear_fish()
-    self.check_add_fish()
+    self.check_add_fish(max_fish_size)
 
     
 
@@ -254,10 +254,10 @@ class School():
       if not fish.alive:
         self.fish_list.pop(count)
 
-  def check_add_fish(self):
+  def check_add_fish(self,max_fish_size):
     #TODO add sizes to fish
     while len(self.fish_list) < MAX_FISH:
-      fish_eaten=random.randint(MIN_FISH_SIZE,MAX_FISH_SIZE)
+      fish_eaten=random.randint(MIN_FISH_SIZE,max_fish_size)
       #Generate fish
       width = 40 + int(fish_eaten*.2 * 5)
       height = 8 + int(fish_eaten*.2 * 1)
