@@ -141,20 +141,23 @@ class Agent:
         #####NORMALIZE INPUTS
         game_state = []
         #distances from sides
+        if RELATIVE_STATES:
         game_state.append(fishy.x/window_size[0]) #distance from left 
         game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
         game_state.append(fishy.y/window_size[1]) #distance from up
         game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
         #Input Layer Data, input about fishy
-        #game_state.append(fishy.x/window_size[0]) #x1
-        #game_state.append(fishy.y/window_size[1]) #y1
-        #game_state.append((fishy.x + fishy.width)/window_size[0]) #x2
-        #game_state.append((fishy.y + fishy.height)/window_size[1]) #y2
+        else:
+            game_state.append(fishy.x/window_size[0]) #x1
+            game_state.append(fishy.y/window_size[1]) #y1
+            game_state.append((fishy.x + fishy.width)/window_size[0]) #x2
+            game_state.append((fishy.y + fishy.height)/window_size[1]) #y2
         #game_state.append(fishy.x_speed/10)
         #game_state.append(fishy.y_speed/10)
         #Add data for all fish
         for fish in school.fish_list:
             #RELATIVE POSITIONS
+            if RELATIVE_STATES:
             #game_state.append((fish.x-fishy.x)/window_size[0])
             #game_state.append((fish.y-fishy.y)/window_size[1])
             
@@ -181,10 +184,11 @@ class Agent:
             #^RELATIVE POSITIONS
             
             #ABSOLUTE POSITIONS
-            #game_state.append(fish.x/window_size[0]) #x1
-            #game_state.append(fish.y/window_size[1]) #y1
-            #game_state.append((fish.x + fish.width)/window_size[0]) #x2
-            #game_state.append((fish.y + fish.height)/window_size[1]) #y2
+            else:
+                game_state.append(fish.x/window_size[0]) #x1
+                game_state.append(fish.y/window_size[1]) #y1
+                game_state.append((fish.x + fish.width)/window_size[0]) #x2
+                game_state.append((fish.y + fish.height)/window_size[1]) #y2
         
             game_state.append(abs(fish.x_speed/10) if fish.x_speed>0 else 0.0)
             game_state.append(abs(fish.x_speed/10) if fish.x_speed<0 else 0.0)

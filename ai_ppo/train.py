@@ -5,6 +5,7 @@ from graph import plot,plot_time
 from variables import *
 from collections import deque
 import os
+import cProfile
 import optuna
 from optuna.trial import TrialState
 
@@ -22,6 +23,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
     plot_records = []
     total_fish_eaten = 0
     record = 0
+    recent_mean_record = 0
     plot_time_alives = []
     plot_mean_time_alives = []
     plot_time_records = []
@@ -117,9 +119,10 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
 
                 printt(len(main_agent.memory.states),'MEMORY')
                 main_agent.n_games += 1
-                if main_fishy.fish_eaten >= record:
+                if main_fishy.fish_eaten >= record and recent_mean_record>=recent_mean_record and main_agent.n_games>100:
                     record = main_fishy.fish_eaten
                     if not TEST:
+
                         main_agent.save_models()
                         printt('MODEL SAVED')
                     #print(main_agent.model.parameters())
@@ -204,4 +207,5 @@ if __name__ == '__main__':
         for key, value in trial.params.items():
             print("    {}: {}".format(key, value))
     else:
+        #cProfile.run('main()')
         main()
