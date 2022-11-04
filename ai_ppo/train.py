@@ -125,7 +125,8 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             #train long memory if done
 
             if done:
-                main_agent.remember(state_old,move,prob,val,reward,done)
+                #main_agent.remember(state_old,move,prob,val,reward,done)
+                main_agent.memory.rewards[-2] = main_agent.memory.rewards[-1]
 
 
 
