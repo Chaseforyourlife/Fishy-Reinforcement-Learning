@@ -44,21 +44,21 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #print(flipped)
 
     if flipped:
-        reward -=2
+        reward -=.2
         pass
     if stopped:
-        reward -=2
+        reward -=.2
         pass
     if fishy.alive:
         #reward -= 1
         pass
     else:
         if REWARD_EAT:
-            reward -=10
+            reward -=.9
     if REWARD_EAT:
         #reward += fish_eaten*1
         if fish_eaten:
-            reward+=5
+            reward+=.2
     if win:
         #reward += 1000
         pass
@@ -78,19 +78,28 @@ class PPOMemory:
             self.batch_size=trial.suggest_int("batch_size",OPTUNA_BATCH_SIZE[0],OPTUNA_BATCH_SIZE[1],log=True)
         else:
             self.batch_size=batch_size
-    def generate_batches(self):
+    def generate_batches(self,reverse=False):
         n_states=len(self.states)
         batch_start = np.arange(0,n_states,self.batch_size)
         indicies = np.arange(n_states,dtype=np.int64)
         np.random.shuffle(indicies)
         batches = [indicies[i:i+self.batch_size] for i in batch_start]
-        return np.array(self.states),\
-                np.array(self.actions),\
-                np.array(self.probs),\
-                np.array(self.vals),\
-                np.array(self.rewards),\
-                np.array(self.dones),\
-                batches
+        if reverse:
+            return np.array(self.states),\
+                np.array(self.actions[::-1]),\
+                np.array(self.probs[::-1]),\
+                np.array(self.vals[::-1]),\
+                np.array(self.rewards[::-1]),\
+                np.array(self.dones[::-1]),\
+                batches[:][::-1]
+        else:
+            return np.array(self.states),\
+                    np.array(self.actions),\
+                    np.array(self.probs),\
+                    np.array(self.vals),\
+                    np.array(self.rewards),\
+                    np.array(self.dones),\
+                    batches
     def store_memory(self,state,action,prob,val,reward,done):
         self.states.append(state)
         self.actions.append(action)
@@ -182,16 +191,19 @@ class Agent:
                 game_state.append(x_dis/window_size[0])
                 game_state.append(y_dis/window_size[1])
                 #^RELATIVE POSITIONS
-                
+            #max(min(x,1),0)
             #ABSOLUTE POSITIONS
             else:
-                game_state.append(fish.x/window_size[0]) #x1
-                game_state.append(fish.y/window_size[1]) #y1
-                game_state.append((fish.x + fish.width)/window_size[0]) #x2
-                game_state.append((fish.y + fish.height)/window_size[1]) #y2
-        
-            game_state.append(abs(fish.x_speed/10) if fish.x_speed>0 else 0.0)
-            game_state.append(abs(fish.x_speed/10) if fish.x_speed<0 else 0.0)
+                game_state.append(max(min(fish.x/window_size[0],1),0)) #x1
+                game_state.append(max(min(fish.y/window_size[1],1),0)) #y1
+                game_state.append(max(min((fish.x + fish.width)/window_size[0],1),0)) #x2
+                game_state.append(max(min((fish.y + fish.height)/window_size[1],1),0)) #y2
+            ## JUST DIRECTION
+            game_state.append(1.0 if fish.x_speed>0 else 0.0)
+            game_state.append(1.0 if fish.x_speed<0 else 0.0)
+            ##SPEED AND DIRECTION
+            #game_state.append(abs(fish.x_speed/10) if fish.x_speed>0 else 0.0)
+            #game_state.append(abs(fish.x_speed/10) if fish.x_speed<0 else 0.0)
             # need 2 nodes, can't use one node because seperate actions need to occur for both smaller and bigger
             game_state.append(float(fish.fish_eaten>fishy.fish_eaten)) #is_bigger
             game_state.append(float(fish.fish_eaten<=fishy.fish_eaten)) #is_smaller
@@ -228,18 +240,34 @@ class Agent:
         print('... loading models ...')
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
+        for name,layer in self.actor.actor.named_parameters():
+            print(name,layer)
+            print(layer.shape)
+            print(layer[:,[10,11]])
+            break
     def get_action(self,observation):
         state = torch.tensor(np.array([observation]),dtype=torch.float).to(self.actor.device)
         dist=self.actor(state)
         #print('DIST',dist)
         value=self.critic(state)
         #print('VALUE',value)
+        printt(dist.probs)
+       
         action=dist.sample()
+        
+
         #print('ACTION',action)
         probs=torch.squeeze(dist.log_prob(action)).item()
         action=torch.squeeze(action).item()
+        
+        if random.randint(0,100)>100*(1-EPSILON):
+            if ALLOW_DIAGONALS:
+                action = random.randint(0,8)
+            else:
+                action = random.randint(0,4)
         #move = [0,0,0,0,0,0,0,0,0]
         value=torch.squeeze(value).item()
+        
         #move[action]=1
 
 
@@ -247,28 +275,46 @@ class Agent:
     def learn(self):
         for _ in range(self.n_epochs):
             printt('Starting Epoch')
-            state_arr,action_arr,old_probs_arr,vals_arr,reward_arr,done_arr,batches=self.memory.generate_batches()
+            state_arr,action_arr,old_probs_arr,vals_arr,reward_arr,done_arr,batches=self.memory.generate_batches(reverse=(True if REVERSE_ADVANTAGE else False))
             
             values = vals_arr
             advantage=np.zeros(len(reward_arr),dtype=np.float32)
-
+            printt('values:',values)
+            printt(len(values))
             #Loop through total timesteps
+            #k_values = set()
+            #k_plus_one_values = set()
+            printt('reward_arr[0]:',reward_arr[0])
+            printt('reward_arr[-1]:',reward_arr[-1])
             for t in range(len(reward_arr)-1):
+                printt(reward_arr[t])
                 discount=1
                 a_t = 0
                 timesteps=0
                 for k in range(t,len(reward_arr)-1):
+                    #k_values.add(k)
+                    printt(reward_arr[k])
                     if timesteps >=TIMESTEPS_PER_ITERATION:
                         break
-                    a_t += discount*(reward_arr[k]+self.gamma*values[k+1]*(1-int(done_arr[k]))-values[k])
+                    if REVERSE_ADVANTAGE:
+                        a_t += discount*(reward_arr[k]+self.gamma*values[k-1]*(1-int(done_arr[k]))-values[k])
+                    else:
+                        a_t += discount*(reward_arr[k]+self.gamma*values[k+1]*(1-int(done_arr[k]))-values[k])
                     discount *= self.gamma*self.gae_lambda
                     timesteps+=1
                 
                 advantage[t] = a_t
+            #printt(k_values)
+            printt(len(advantage))
+            printt(advantage)
+            printt(advantage[len(reward_arr)-1])
+            if REVERSE_ADVANTAGE:
+                advantage=np.flip(advantage)
+            print(advantage[-10:])
             ###NORMALIZE REWARDS???
             #advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10)
             ###^Not in original
-            advantage = torch.tensor(advantage).to(self.actor.device)
+            advantage = torch.tensor(advantage.copy()).to(self.actor.device)
             values = torch.tensor(values).to(self.actor.device)
             printt('Batches Ready')
             for count,batch in enumerate(batches):
@@ -291,10 +337,16 @@ class Agent:
                 critic_loss = (returns-critic_value)**2
                 critic_loss = critic_loss.mean()
 
-                total_loss = actor_loss + 0.5*critic_loss
+                printt(f'ACTOR LOSS: {actor_loss}')
+                printt(f'CRITIC LOSS: {critic_loss}')
+
+
+                #total_loss = actor_loss + 0.5*critic_loss
                 self.actor.optimizer.zero_grad()
                 self.critic.optimzier.zero_grad()
-                total_loss.backward()
+                #total_loss.backward()
+                actor_loss.backward()
+                critic_loss.backward()
                 self.actor.optimizer.step()
                 self.critic.optimzier.step()
             

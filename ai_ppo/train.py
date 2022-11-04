@@ -19,7 +19,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
-  MAX_FISH_SIZE = 0
+  MAX_FISH_SIZE = START_MAX_FISH_SIZE
   MAX_FISH_CONSUMED = MAX_FISH_SIZE+5
   fishy_background = pygame.image.load('../static/images/fishy-background.png')
   clock = pygame.time.Clock()
@@ -117,11 +117,15 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                 main_agent.remember(state_old,move,reward,state_new,done)
             '''
             #######main_agent.remember(state_old,move,reward,state_new,done)
-            main_agent.remember(state_old,move,prob,val,reward,done)
+            if FRAME_SKIP:
+                if reward!=0 and random.randint(0,100)>FRAME_SKIP*100:
+                    main_agent.remember(state_old,move,prob,val,reward,done)
+            else:
+                main_agent.remember(state_old,move,prob,val,reward,done)
             #train long memory if done
 
             if done:
-                
+                main_agent.remember(state_old,move,prob,val,reward,done)
 
 
 
@@ -161,7 +165,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                 #AUTOMATICALLY INCREASE FISH SIZE
                 if TRAINING_STATE=='MOVE':
                     #if recent_fish_eaten_mean>=MAX_FISH_CONSUMED-1 and main_agent.n_games>=50:
-                    if record>=MAX_FISH_CONSUMED and main_agent.n_games>=50:
+                    if record>=MAX_FISH_CONSUMED and main_agent.n_games>=50 and INCREMENT_FISH_SIZE:
                         MAX_FISH_SIZE+=1
                         MAX_FISH_CONSUMED+=1
 
