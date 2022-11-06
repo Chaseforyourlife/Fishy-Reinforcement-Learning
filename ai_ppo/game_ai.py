@@ -44,10 +44,10 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #print(flipped)
 
     if flipped:
-        reward -=.2
+        #reward -=.2
         pass
     if stopped:
-        reward -=.2
+        #reward -=.2
         pass
     if fishy.alive:
         #reward -= 1
