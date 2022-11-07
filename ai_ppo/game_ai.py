@@ -44,17 +44,25 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     #print(flipped)
 
     if flipped:
-        #reward -=.2
+        reward -=.2
         pass
     if stopped:
-        #reward -=.2
+        reward -=.2
         pass
     if fishy.alive:
         #reward -= 1
         pass
-    else:
-        if REWARD_EAT:
-            reward -=.9
+    for fish in school.fish_list:
+        over=False
+        lined_up=False
+        #Right and Left collision 
+        if(fishy.x < fish.x + fish.width and fishy.x + fishy.width > fish.x):
+            over = True
+        #Top and bottom collision
+        if (fishy.y < fish.y + fish.height and fishy.y + fishy.height > fish.y):
+            lined_up = True 
+        if over and lined_up:
+            reward-=.9
     if REWARD_EAT:
         #reward += fish_eaten*1
         if fish_eaten:
@@ -277,6 +285,7 @@ class Agent:
             printt('Starting Epoch')
             state_arr,action_arr,old_probs_arr,vals_arr,reward_arr,done_arr,batches=self.memory.generate_batches(reverse=(True if REVERSE_ADVANTAGE else False))
             
+            #NVM: originally: both longer by 1
             values = vals_arr
             advantage=np.zeros(len(reward_arr),dtype=np.float32)
             printt('values:',values)
@@ -302,7 +311,9 @@ class Agent:
                         a_t += discount*(reward_arr[k]+self.gamma*values[k+1]*(1-int(done_arr[k]))-values[k])
                     discount *= self.gamma*self.gae_lambda
                     timesteps+=1
-                
+                    #if t==len(reward_arr)-4:
+                        #print(reward_arr[k])
+                        #print(a_t)
                 advantage[t] = a_t
             #printt(k_values)
             printt(len(advantage))
@@ -310,7 +321,8 @@ class Agent:
             printt(advantage[len(reward_arr)-1])
             if REVERSE_ADVANTAGE:
                 advantage=np.flip(advantage)
-            print(advantage[-10:])
+            print('LAST ADVANTAGES:',advantage[-10:])
+            print('LAST VALUES:',values[-10:])
             ###NORMALIZE REWARDS???
             #advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10)
             ###^Not in original

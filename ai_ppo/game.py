@@ -199,7 +199,7 @@ class Fishy:
       self.image_left = pygame.transform.scale(LEFT_IMAGES['orange'],(self.width,self.height)) 
       self.image_right = pygame.transform.scale(RIGHT_IMAGES['orange'],(self.width,self.height))
       return True 
-    else:
+    elif DEATH_ON_CONTACT:
       self.alive = False
       return False
 

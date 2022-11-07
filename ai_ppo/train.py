@@ -119,14 +119,24 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             #######main_agent.remember(state_old,move,reward,state_new,done)
             if FRAME_SKIP:
                 if reward!=0 and random.randint(0,100)>FRAME_SKIP*100:
-                    main_agent.remember(state_old,move,prob,val,reward,done)
+                    main_agent.remember(state_old,move,prob,val,reward,done=False)
             else:
-                main_agent.remember(state_old,move,prob,val,reward,done)
+                main_agent.remember(state_old,move,prob,val,reward,done=False)
             #train long memory if done
 
             if done:
+                #last reward not used in equation
+                reward=0
+                last_state = main_agent.get_state(main_fishy,main_school)
+                null_move,null_prob,last_val = main_agent.get_action(state_old)
+                main_agent.remember(last_state,null_move,null_prob,last_val,reward,done=True)
+                
+                
+
                 #main_agent.remember(state_old,move,prob,val,reward,done)
-                main_agent.memory.rewards[-2] = main_agent.memory.rewards[-1]
+                if SHIFT_LAST_ADVANTAGE:
+                    main_agent.memory.rewards[-2] = main_agent.memory.rewards[-1]
+                
 
 
 
