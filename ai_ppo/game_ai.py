@@ -61,12 +61,12 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
         #Top and bottom collision
         if (fishy.y < fish.y + fish.height and fishy.y + fishy.height > fish.y):
             lined_up = True 
-        if over and lined_up:
-            reward-=.9
+        if over and lined_up and fishy.fish_eaten < fish.fish_eaten and fish.alive == True:
+            reward-=1
     if REWARD_EAT:
         #reward += fish_eaten*1
         if fish_eaten:
-            reward+=.2
+            reward+=1
     if win:
         #reward += 1000
         pass
@@ -86,28 +86,20 @@ class PPOMemory:
             self.batch_size=trial.suggest_int("batch_size",OPTUNA_BATCH_SIZE[0],OPTUNA_BATCH_SIZE[1],log=True)
         else:
             self.batch_size=batch_size
-    def generate_batches(self,reverse=False):
+    def generate_batches(self):
         n_states=len(self.states)
         batch_start = np.arange(0,n_states,self.batch_size)
         indicies = np.arange(n_states,dtype=np.int64)
         np.random.shuffle(indicies)
-        batches = [indicies[i:i+self.batch_size] for i in batch_start]
-        if reverse:
-            return np.array(self.states),\
-                np.array(self.actions[::-1]),\
-                np.array(self.probs[::-1]),\
-                np.array(self.vals[::-1]),\
-                np.array(self.rewards[::-1]),\
-                np.array(self.dones[::-1]),\
-                batches[:][::-1]
-        else:
-            return np.array(self.states),\
-                    np.array(self.actions),\
-                    np.array(self.probs),\
-                    np.array(self.vals),\
-                    np.array(self.rewards),\
-                    np.array(self.dones),\
-                    batches
+        batches = [indicies[i:min(i+self.batch_size,n_states-1)] for i in batch_start]
+        
+        return np.array(self.states),\
+                np.array(self.actions),\
+                np.array(self.probs),\
+                np.array(self.vals),\
+                np.array(self.rewards),\
+                np.array(self.dones),\
+                batches
     def store_memory(self,state,action,prob,val,reward,done):
         self.states.append(state)
         self.actions.append(action)
@@ -283,7 +275,7 @@ class Agent:
     def learn(self):
         for _ in range(self.n_epochs):
             printt('Starting Epoch')
-            state_arr,action_arr,old_probs_arr,vals_arr,reward_arr,done_arr,batches=self.memory.generate_batches(reverse=(True if REVERSE_ADVANTAGE else False))
+            state_arr,action_arr,old_probs_arr,vals_arr,reward_arr,done_arr,batches=self.memory.generate_batches()
             
             #NVM: originally: both longer by 1
             values = vals_arr
@@ -305,10 +297,8 @@ class Agent:
                     printt(reward_arr[k])
                     if timesteps >=TIMESTEPS_PER_ITERATION:
                         break
-                    if REVERSE_ADVANTAGE:
-                        a_t += discount*(reward_arr[k]+self.gamma*values[k-1]*(1-int(done_arr[k]))-values[k])
-                    else:
-                        a_t += discount*(reward_arr[k]+self.gamma*values[k+1]*(1-int(done_arr[k]))-values[k])
+                    
+                    a_t += discount*(reward_arr[k]+self.gamma*values[k+1]*(1-int(done_arr[k]))-values[k])
                     discount *= self.gamma*self.gae_lambda
                     timesteps+=1
                     #if t==len(reward_arr)-4:
@@ -319,10 +309,12 @@ class Agent:
             printt(len(advantage))
             printt(advantage)
             printt(advantage[len(reward_arr)-1])
-            if REVERSE_ADVANTAGE:
-                advantage=np.flip(advantage)
+           
+            print()
+            print('LAST REWARDS:',reward_arr[-10:])
             print('LAST ADVANTAGES:',advantage[-10:])
             print('LAST VALUES:',values[-10:])
+            
             ###NORMALIZE REWARDS???
             #advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10)
             ###^Not in original

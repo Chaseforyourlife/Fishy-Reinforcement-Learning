@@ -192,8 +192,9 @@ class Fishy:
     if other_fish.alive == False:
       return False
     elif self.fish_eaten >= other_fish.fish_eaten and other_fish.alive == True:
-      other_fish.alive = False
-      self.fish_eaten += 1
+      if DEATH_ON_CONTACT:
+        other_fish.alive = False
+        self.fish_eaten += 1
       self.width = 40 + int(self.fish_eaten*.2 * 5)
       self.height = 8 + int(self.fish_eaten*.2 * 1)
       self.image_left = pygame.transform.scale(LEFT_IMAGES['orange'],(self.width,self.height)) 
