@@ -285,8 +285,9 @@ class Agent:
             #Loop through total timesteps
             #k_values = set()
             #k_plus_one_values = set()
-            printt('reward_arr[0]:',reward_arr[0])
-            printt('reward_arr[-1]:',reward_arr[-1])
+            #reward_arr=[]
+            #printt('reward_arr[0]:',reward_arr[0])
+            #printt('reward_arr[-1]:',reward_arr[-1])
             for t in range(len(reward_arr)-1):
                 printt(reward_arr[t])
                 discount=1
@@ -306,9 +307,9 @@ class Agent:
                         #print(a_t)
                 advantage[t] = a_t
             #printt(k_values)
-            printt(len(advantage))
-            printt(advantage)
-            printt(advantage[len(reward_arr)-1])
+            #printt(len(advantage))
+            #printt(advantage)
+            #printt(advantage[len(reward_arr)-1])
            
             print()
             print('LAST REWARDS:',reward_arr[-10:])
