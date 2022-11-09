@@ -260,11 +260,7 @@ class Agent:
         probs=torch.squeeze(dist.log_prob(action)).item()
         action=torch.squeeze(action).item()
         
-        if random.randint(0,100)>100*(1-EPSILON):
-            if ALLOW_DIAGONALS:
-                action = random.randint(0,8)
-            else:
-                action = random.randint(0,4)
+        
         #move = [0,0,0,0,0,0,0,0,0]
         value=torch.squeeze(value).item()
         
@@ -355,5 +351,5 @@ class Agent:
                 self.actor.optimizer.step()
                 self.critic.optimzier.step()
             
-            self.memory.clear_memory()
+        self.memory.clear_memory()
     
