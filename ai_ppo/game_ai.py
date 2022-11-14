@@ -215,6 +215,7 @@ class Agent:
         #game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
         #game_state.append(fishy.y) #distance from up
         #game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
+        #print(game_state)
         '''
         #Fishy x and y
         game_state.append((fishy.x+fishy.width/2)/window_size[0])
