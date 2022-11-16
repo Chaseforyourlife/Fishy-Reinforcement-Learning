@@ -196,7 +196,7 @@ class Agent:
     def get_action(self,observation):
         #print(observation)
         #print(observation.dtype)
-        state = torch.tensor(np.array([observation]),dtype=torch.float)
+        state = torch.tensor(np.array(observation),dtype=torch.float)
         #print(state_tensor)
         state =state.to(self.actor.device)
         dist=self.actor(state)
