@@ -138,15 +138,10 @@ class Agent:
         self.memory=PPOMemory(BATCH_SIZE,trial)
 
 
-        #self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when exceeding max_memory
-        #TODO: model,trainer
-        #self.model = Linear_QNet(sizes=SIZES)
-        #self.trainer = QTrainer(self.model,LEARNING_RATE,GAMMA)
+
         self.random_moves_remaining = 0
         self.random_move_index = None
-        #self.model.load()
-        #if LOAD_OPTIMIZER:
-        #    self.trainer.load()
+        
     def get_state(self,fishy,school):
         screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
         screen[int(max(fishy.y,0)):int(max(fishy.y+fishy.height,0)),int(max(fishy.x,0)):int(max(fishy.x+fishy.width,0)),2] = 1
@@ -181,13 +176,16 @@ class Agent:
         self.memory.store_memory(state,action,prob,val,reward,done)
     def save_models(self):
         if SAVE_MODEL:
+            
             print('... saving models ...')
             self.actor.save_checkpoint()
             self.critic.save_checkpoint()
     def load_models(self):
         print('... loading models ...')
+        
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
+        self.actor.actor.summary()
         for name,layer in self.actor.actor.named_parameters():
             print(name,layer)
             print(layer.shape)
@@ -196,9 +194,10 @@ class Agent:
     def get_action(self,observation):
         #print(observation)
         #print(observation.dtype)
-        state = torch.tensor(np.array(observation),dtype=torch.float)
+        state = torch.tensor(np.array([observation]),dtype=torch.float)
         #print(state_tensor)
         state =state.to(self.actor.device)
+        #print(f'STATe {state}')
         dist=self.actor(state)
         #print('DIST',dist)
         
@@ -207,10 +206,12 @@ class Agent:
         #print('VALUE',value)
         #print(dist.probs)
        
+        
         action=dist.sample()
         
 
         #print('ACTION',action)
+        #print(dist.log_prob(action))
         probs=torch.squeeze(dist.log_prob(action)).item()
         action=torch.squeeze(action).item()
         

@@ -80,7 +80,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             #get original_state
             #print('GET STATE OLD')
             state_old = main_agent.get_state(main_fishy,main_school)
-        
+            
             
             #move fish_list
             main_school.move()
