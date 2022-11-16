@@ -148,13 +148,14 @@ class Agent:
         #if LOAD_OPTIMIZER:
         #    self.trainer.load()
     def get_state(self,fishy,school):
-        screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='uint8')
+        screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
         screen[int(max(fishy.y,0)):int(max(fishy.y+fishy.height,0)),int(max(fishy.x,0)):int(max(fishy.x+fishy.width,0)),2] = 1
         for fish in school.fish_list:
-            screen[max(fish.y,0):max(fish.y+fish.height,0),max(fish.x,0):max(fish.x+fish.width,0),1 if fishy.fish_eaten > fish.fish_eaten else 0] = 1 
-        
-        cv.imshow('frame',screen[:,:,::-1])
-        cv.waitKey(1)
+            screen[max(fish.y,0):max(fish.y+fish.height,0),max(fish.x,0):max(fish.x+fish.width,0),1 if fishy.fish_eaten >= fish.fish_eaten else 0] = 1 
+        if SHOW_STATE_SCREEN:
+            showscreen = screen.astype('float')
+            cv.imshow('frame',showscreen[:,:,::-1])
+            cv.waitKey(1)
         
         screen = screen.swapaxes(0,2)
         #imgdata = imgdata.swapaxes(0,1)
@@ -193,7 +194,11 @@ class Agent:
             print(layer[:,[10,11]])
             break
     def get_action(self,observation):
-        state = torch.tensor(np.array([observation]),dtype=torch.float).to(self.actor.device)
+        #print(observation)
+        #print(observation.dtype)
+        state = torch.tensor(np.array([observation]),dtype=torch.float)
+        #print(state_tensor)
+        state =state.to(self.actor.device)
         dist=self.actor(state)
         #print('DIST',dist)
         

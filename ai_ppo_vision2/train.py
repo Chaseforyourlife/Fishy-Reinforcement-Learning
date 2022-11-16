@@ -16,7 +16,7 @@ import optuna
 from optuna.trial import TrialState
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
-
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
   MAX_FISH_SIZE = START_MAX_FISH_SIZE
