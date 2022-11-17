@@ -83,6 +83,7 @@ class PPOMemory:
         self.actions=[]
         self.rewards=[]
         self.dones=[]
+        
         if OPTUNA and OPTUNA_BATCH_SIZE:
             self.batch_size=trial.suggest_int("batch_size",OPTUNA_BATCH_SIZE[0],OPTUNA_BATCH_SIZE[1],log=True)
         else:
@@ -143,6 +144,21 @@ class Agent:
         self.random_move_index = None
         
     def get_state(self,fishy,school):
+        int_convert = lambda x:int(max(x,0))
+        fishy_coords = tuple(map(int_convert,(fishy.x,fishy.y,fishy.x+fishy.width,fishy.y+fishy.height,2)))
+        school_coords = [fishy_coords]
+        for fish in school.fish_list:
+            fish_coords = tuple(map(int_convert,(fish.x,fish.y,fish.x+fish.width,fish.y+fish.height,1 if fishy.fish_eaten >= fish.fish_eaten else 0)))
+            school_coords.append(fish_coords)
+        game_state = [school_coords]
+        for i in range(PREV_FRAME_NUMBER):
+            if len(self.memory.states)>i:
+                prev_state = self.memory.states[-(i+1)][0]
+                game_state.append(prev_state)
+            else:
+                game_state.append(game_state[0])
+        return game_state
+        '''
         screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
         screen[int(max(fishy.y,0)):int(max(fishy.y+fishy.height,0)),int(max(fishy.x,0)):int(max(fishy.x+fishy.width,0)),2] = 1
         for fish in school.fish_list:
@@ -153,22 +169,20 @@ class Agent:
             cv.waitKey(1)
         
         screen = screen.swapaxes(0,2)
-        #imgdata = imgdata.swapaxes(0,1)
         
-        '''
-        #WORKING STUFF
-        imgdata = pygame.surfarray.array3d(pygame.display.get_surface())
-        #imgdata=cv.resize(imgdata,dsize=(275,200,3),interpolation=cv.INTER_CUBIC)
+        screens = [screen]
         #imgdata = imgdata.swapaxes(0,1)
-        #cv.imshow('frame',imgdata[:,:,::-1])
-        #cv.waitKey(5000)
-        imgdata = cv.resize(imgdata,dsize=window_resize,interpolation=cv.INTER_CUBIC)
-        #get data in correct format
-        imgdata = imgdata.swapaxes(0,2)
-        #print(imgdata.shape)
-        return imgdata/255.0
-        '''
+        for i in range(PREV_FRAME_NUMBER):
+            if len(self.memory.states)>i:
+                prev_screen = self.memory.states[-(i+1)][0:3]
+                screens.append(prev_screen)
+            else:
+                screens.append(screen)
+        screen = np.concatenate(screens)
         return screen
+        '''
+        
+    
 
     def remember(self,state,action,prob,val,reward,done):
         if TEST:
@@ -189,10 +203,9 @@ class Agent:
         
         
     def get_action(self,observation):
-        #print(observation)
-        #print(observation.dtype)
-        state = torch.tensor(np.array([observation]),dtype=torch.float)
-        #print(state_tensor)
+        observation_screen = self.actor.state_to_screen(observation)
+        state = torch.tensor(np.array([observation_screen]),dtype=torch.float)
+       
         state =state.to(self.actor.device)
         #print(f'STATe {state}')
         dist=self.actor(state)
@@ -271,8 +284,13 @@ class Agent:
             values = torch.tensor(values).to(self.actor.device)
             printt('Batches Ready')
             for count,batch in enumerate(batches):
+                new_state_arr = []
+                states = state_arr[batch]
+                for state in states:
+                    new_state_arr.append(self.actor.state_to_screen(state))
                 printt(f'Batch {count}')
-                states = torch.tensor(state_arr[batch],dtype=torch.float).to(self.actor.device)
+                #states = torch.tensor(state_arr[batch],dtype=torch.float).to(self.actor.device)
+                states = torch.tensor(np.array(new_state_arr),dtype=torch.float).to(self.actor.device)
                 old_probs = torch.tensor(old_probs_arr[batch]).to(self.actor.device)
                 actions = torch.tensor(action_arr[batch]).to(self.actor.device)
 

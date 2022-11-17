@@ -115,7 +115,9 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             reward = calculate_reward(main_fishy,main_school,fish_eaten,win,flipped,stopped,state_old)
             #get new game state
             #print('GET STATE NEW')
-            state_new = main_agent.get_state(main_fishy,main_school)
+
+            #NEW STATE NO LONGER UTILIZED
+            #state_new = main_agent.get_state(main_fishy,main_school)
 
             #train short memory
             #main_agent.train_short_memory(state_old,move,reward,state_new,done)

@@ -4,7 +4,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 from variables import *
-
+import cv2 as cv
+import numpy as np
 import os
 
 TELEMETRY = False
@@ -41,13 +42,15 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
         self.actor = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2, padding=1),
+            nn.Conv2d(3+PREV_FRAME_NUMBER*3, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(3, 3),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.Flatten(),
-            nn.Linear(1536,250),
+            nn.Linear(32,250),
             nn.ReLU(),
             nn.Linear(250, SIZES[-1]),
             nn.Softmax(dim=-1)
@@ -64,8 +67,24 @@ class ActorNetwork(nn.Module):
             self.optimizer = optim.Adam(self.parameters(),lr=lr)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
-    
+    def state_to_screen(self,state):
+        screens=[]
+        for frame in state:
+            #print(frame)
+            screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
+            for x1,y1,x2,y2,fish_type in frame:
+                screen[y1:y2,x1:x2,fish_type] = 1
+            if SHOW_STATE_SCREEN:
+                showscreen = screen.astype('float')
+                cv.imshow('frame',showscreen[:,:,::-1])
+                cv.waitKey(1)
+            screen = screen.swapaxes(0,2)
+            screens.append(screen)
+        screen = np.concatenate(screens)
+        return screen
     def forward(self,state):
+        #print(state)
+        #state = self.state_to_screen(state)
         dist = self.actor(state)
         dist=Categorical(dist)
         return dist
@@ -82,13 +101,15 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
         self.critic = nn.Sequential(
-            nn.Conv2d(3, 32, 3, stride=2, padding=1),
+            nn.Conv2d(3+PREV_FRAME_NUMBER*3, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(3, 3),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.Flatten(),
-            nn.Linear(1536,250),
+            nn.Linear(32,250),
             nn.ReLU(),
             nn.Linear(250, 1)
         )
