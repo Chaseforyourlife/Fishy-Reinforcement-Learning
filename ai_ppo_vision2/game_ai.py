@@ -185,12 +185,9 @@ class Agent:
         
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
-        self.actor.actor.summary()
-        for name,layer in self.actor.actor.named_parameters():
-            print(name,layer)
-            print(layer.shape)
-            print(layer[:,[10,11]])
-            break
+        
+        
+        
     def get_action(self,observation):
         #print(observation)
         #print(observation.dtype)
