@@ -247,6 +247,7 @@ class Agent:
             print(layer[:,[10,11]])
             break
     def get_action(self,observation):
+        print(observation)
         state = torch.tensor(np.array([observation]),dtype=torch.float).to(self.actor.device)
         dist=self.actor(state)
         #print('DIST',dist)

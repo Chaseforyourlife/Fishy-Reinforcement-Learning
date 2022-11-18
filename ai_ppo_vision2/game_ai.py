@@ -10,8 +10,7 @@ from itertools import islice
 import cv2 as cv
 import pygame
 from PIL import Image
-TELEMETRY = False
-
+TELEMETRY = True
 
 
 
@@ -203,9 +202,11 @@ class Agent:
         
         
     def get_action(self,observation):
+    
         observation_screen = self.actor.state_to_screen(observation)
+        
         state = torch.tensor(np.array([observation_screen]),dtype=torch.float)
-       
+        
         state =state.to(self.actor.device)
         #print(f'STATe {state}')
         dist=self.actor(state)
@@ -215,7 +216,7 @@ class Agent:
         value=self.critic(state)
         #print('VALUE',value)
         #print(dist.probs)
-       
+    
         
         action=dist.sample()
         
@@ -233,6 +234,7 @@ class Agent:
 
 
         return action,probs,value
+    
     def learn(self):
         for _ in range(self.n_epochs):
             printt('Starting Epoch')
@@ -250,13 +252,13 @@ class Agent:
             #printt('reward_arr[0]:',reward_arr[0])
             #printt('reward_arr[-1]:',reward_arr[-1])
             for t in range(len(reward_arr)-1):
-                printt(reward_arr[t])
+                #printt(reward_arr[t])
                 discount=1
                 a_t = 0
                 timesteps=0
                 for k in range(t,len(reward_arr)-1):
                     #k_values.add(k)
-                    printt(reward_arr[k])
+                    #printt(reward_arr[k])
                     if timesteps >=TIMESTEPS_PER_ITERATION:
                         break
                     
@@ -288,12 +290,15 @@ class Agent:
                 states = state_arr[batch]
                 for state in states:
                     new_state_arr.append(self.actor.state_to_screen(state))
+
                 printt(f'Batch {count}')
                 #states = torch.tensor(state_arr[batch],dtype=torch.float).to(self.actor.device)
                 states = torch.tensor(np.array(new_state_arr),dtype=torch.float).to(self.actor.device)
                 old_probs = torch.tensor(old_probs_arr[batch]).to(self.actor.device)
                 actions = torch.tensor(action_arr[batch]).to(self.actor.device)
-
+                printt('states',states)
+                printt('old_probs',old_probs)
+                print('actions',actions)
                 dist = self.actor(states)
                 critic_value = self.critic(states)
                 critic_value = torch.squeeze(critic_value)

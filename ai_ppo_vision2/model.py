@@ -85,6 +85,7 @@ class ActorNetwork(nn.Module):
     def forward(self,state):
         #print(state)
         #state = self.state_to_screen(state)
+        print(f'STATE: {state}')
         dist = self.actor(state)
         dist=Categorical(dist)
         return dist
