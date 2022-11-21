@@ -10,7 +10,7 @@ from itertools import islice
 import cv2 as cv
 import pygame
 from PIL import Image
-TELEMETRY = True
+TELEMETRY = False
 
 
 
@@ -90,11 +90,11 @@ class PPOMemory:
     def generate_batches(self):
         n_states=len(self.states)-1 #-1 because we are discarding the last state
         batch_start = np.arange(0,n_states,self.batch_size)
-        print(batch_start)
+        printt(batch_start)
         indicies = np.arange(n_states,dtype=np.int64)
         np.random.shuffle(indicies)
         batches = [indicies[i:min(i+self.batch_size,n_states)] for i in batch_start]
-        print('GenerateBatches:',batches)
+        printt('GenerateBatches:',batches)
         return np.array(self.states),\
                 np.array(self.actions),\
                 np.array(self.probs),\
@@ -286,7 +286,7 @@ class Agent:
             advantage = torch.tensor(advantage.copy()).to(self.actor.device)
             values = torch.tensor(values).to(self.actor.device)
             printt('Batches Ready')
-            print('Batches:',batches)
+            printt('Batches:',batches)
             for count,batch in enumerate(batches):
                 
                 new_state_arr = []
@@ -295,14 +295,14 @@ class Agent:
                     new_state_arr.append(self.actor.state_to_screen(state))
 
                 printt(f'Batch {count}')
-                print(f'BATCH: {batch}')
+                printt(f'BATCH: {batch}')
                 #states = torch.tensor(state_arr[batch],dtype=torch.float).to(self.actor.device)
                 states = torch.tensor(np.array(new_state_arr),dtype=torch.float).to(self.actor.device)
                 old_probs = torch.tensor(old_probs_arr[batch]).to(self.actor.device)
                 actions = torch.tensor(action_arr[batch]).to(self.actor.device)
                 #printt('states',states)
                 printt('old_probs',old_probs)
-                print('actions',actions)
+                printt('actions',actions)
                 dist = self.actor(states)
                 critic_value = self.critic(states)
                 critic_value = torch.squeeze(critic_value)
