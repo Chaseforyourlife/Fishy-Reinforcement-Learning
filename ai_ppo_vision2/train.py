@@ -2,7 +2,7 @@
 from urllib.parse import MAX_CACHE_SIZE
 from variables import *
 
-
+import timeit
 from pickle import FRAME
 from game import *
 from game_ai import *
@@ -64,6 +64,12 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
         done = False
         ###MAIN GAME LOOP AFTER START
         while not done:
+            #print('NEW FRAME')
+            
+
+
+
+
             n_frames+=1
             time_alive += 1
             if SHOW_GAME:
@@ -80,13 +86,17 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             main_school.update(max_fish_size=MAX_FISH_SIZE)
             #get original_state
             #print('GET STATE OLD')
-            state_old = main_agent.get_state(main_fishy,main_school)
 
+            state_old = main_agent.get_state(main_fishy,main_school)
+            
             
             #move fish_list
             main_school.move()
             ##Get AI Model Inference
+            
+            
             move,prob,val = main_agent.get_action(state_old)
+            
             #handle move
             main_fishy.handle_move(move)
             #handle main_fishy movement
@@ -133,7 +143,6 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             else:
                 main_agent.remember(state_old,move,prob,val,reward,done=False)
             #train long memory if done
-
             if done:
                 
                 
