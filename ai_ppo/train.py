@@ -175,7 +175,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                 #AUTOMATICALLY INCREASE FISH SIZE
                 if TRAINING_STATE=='MOVE':
                     #if recent_fish_eaten_mean>=MAX_FISH_CONSUMED-1 and main_agent.n_games>=50:
-                    if record>=MAX_FISH_CONSUMED and main_agent.n_games>=50 and INCREMENT_FISH_SIZE:
+                    if record>=MAX_FISH_CONSUMED and main_agent.n_games>=NUM_GAMES_INCREMENT_START and INCREMENT_FISH_SIZE:
                         MAX_FISH_SIZE+=1
                         MAX_FISH_CONSUMED+=1
 
@@ -210,9 +210,11 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
     print(f'Recent Average Fish Eaten: {plot_recent_fish_eaten_means[-1]}')
     #return plot_recent_fish_eaten_means[-1]
     if OPTUNA_MIN_MAX=='maximize':
-        return plot_mean_fish_eatens[-1]
+        #return plot_mean_fish_eatens[-1]
+        return MAX_FISH_SIZE
     elif OPTUNA_MIN_MAX=='minimize':
         return plot_mean_time_alives[-1]
+    
 
 if __name__ == '__main__':
     if OPTUNA:

@@ -15,7 +15,7 @@ def printt(*strings):
             print(string)
 
 
-conv_base = 
+
 
 class ActorNetwork(nn.Module):
     def __init__(self,sizes):

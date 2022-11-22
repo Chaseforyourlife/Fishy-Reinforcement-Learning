@@ -215,6 +215,7 @@ class Agent:
         #game_state.append((window_size[0]-(fishy.x+fishy.width))/window_size[0]) #distance from right
         #game_state.append(fishy.y) #distance from up
         #game_state.append((window_size[1]-(fishy.y+fishy.height))/window_size[1]) #distance from down 
+        #print(game_state)
         '''
         #Fishy x and y
         game_state.append((fishy.x+fishy.width/2)/window_size[0])
@@ -246,6 +247,7 @@ class Agent:
             print(layer[:,[10,11]])
             break
     def get_action(self,observation):
+        print(observation)
         state = torch.tensor(np.array([observation]),dtype=torch.float).to(self.actor.device)
         dist=self.actor(state)
         #print('DIST',dist)
@@ -260,11 +262,7 @@ class Agent:
         probs=torch.squeeze(dist.log_prob(action)).item()
         action=torch.squeeze(action).item()
         
-        if random.randint(0,100)>100*(1-EPSILON):
-            if ALLOW_DIAGONALS:
-                action = random.randint(0,8)
-            else:
-                action = random.randint(0,4)
+        
         #move = [0,0,0,0,0,0,0,0,0]
         value=torch.squeeze(value).item()
         
@@ -355,5 +353,5 @@ class Agent:
                 self.actor.optimizer.step()
                 self.critic.optimzier.step()
             
-            self.memory.clear_memory()
+        self.memory.clear_memory()
     

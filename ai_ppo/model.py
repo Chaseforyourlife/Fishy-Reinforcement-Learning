@@ -67,6 +67,19 @@ class ActorNetwork(nn.Module):
                 nn.Linear(sizes[3],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
                 nn.Softmax(dim=-1)
             )
+        elif len(SIZES) == 6:
+            self.actor = nn.Sequential(
+                nn.Linear(sizes[0],sizes[1]),
+                nn.ReLU(),
+                nn.Linear(sizes[1],sizes[2]),
+                nn.ReLU(),
+                nn.Linear(sizes[2],sizes[3]),#SHOULD BE CHANGED to INDEX -1
+                nn.ReLU(),
+                nn.Linear(sizes[3],sizes[4]),#SHOULD BE CHANGED to INDEX -1
+                nn.ReLU(),
+                nn.Linear(sizes[4],sizes[-1]),#SHOULD BE CHANGED to INDEX -1
+                nn.Softmax(dim=-1)
+            )
         if OPTUNA and OPTUNA_MODEL:
             self.actor = optuna_get_model(trial,is_actor=True)
         lr = LEARNING_RATE
@@ -119,6 +132,18 @@ class CriticNetwork(nn.Module):
                 nn.Linear(sizes[2],sizes[3]),
                 nn.ReLU(),
                 nn.Linear(sizes[3],1),
+            )
+        elif len(SIZES)==6:
+            self.critic = nn.Sequential(
+                nn.Linear(sizes[0],sizes[1]),
+                nn.ReLU(),
+                nn.Linear(sizes[1],sizes[2]),
+                nn.ReLU(),
+                nn.Linear(sizes[2],sizes[3]),
+                nn.ReLU(),
+                nn.Linear(sizes[3],sizes[4]),
+                nn.ReLU(),
+                nn.Linear(sizes[4],1),
             )
         if OPTUNA and OPTUNA_MODEL:
             self.critic = optuna_get_model(trial,is_actor=False)
