@@ -42,13 +42,12 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
         self.actor = nn.Sequential(
-            nn.Conv2d(3+PREV_FRAME_NUMBER*3, 32, 3, stride=2, padding=1),
+            nn.Conv3d(3, 32, 3, stride=2, padding=1),
+            nn.Flatten(3,4),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            #nn.MaxPool2d(3, 3),
-            #nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.Flatten(),
             #nn.Linear(32,250),
             nn.Linear(768*(1+PREV_FRAME_NUMBER),250),
@@ -81,7 +80,8 @@ class ActorNetwork(nn.Module):
                 cv.waitKey(1)
             screen = screen.swapaxes(0,2)
             screens.append(screen)
-        screen = np.concatenate(screens)
+        screen = np.stack(screens,axis=3)
+        
         return screen
     def forward(self,state):
         #print(state)
@@ -103,13 +103,12 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
         self.critic = nn.Sequential(
-            nn.Conv2d(3+PREV_FRAME_NUMBER*3, 32, 3, stride=2, padding=1),
+            nn.Conv3d(3, 32, 3, stride=2, padding=1),
+            nn.Flatten(3,4),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.MaxPool2d(3, 3),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            #nn.MaxPool2d(3, 3),
-            #nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.Flatten(),
             #nn.Linear(32,250),
             nn.Linear(768*(1+PREV_FRAME_NUMBER),250),
