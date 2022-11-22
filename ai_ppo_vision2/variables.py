@@ -26,7 +26,7 @@ SHOW_STATE_SCREEN = False
 
 window_size = (550,400)
 window_resize = (200,275)
-MAX_FISH = 1
+MAX_FISH = 4
 MAX_FISH_SPEED = 6 #6
 MIN_FISH_SPEED = 2 #2
 #MAX_FISH_SIZE = 0#150 #30 #150
