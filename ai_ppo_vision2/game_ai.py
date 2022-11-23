@@ -207,15 +207,20 @@ class Agent:
        
         starttime = timeit.default_timer()
         observation_screen = self.actor.state_to_screen(observation)
+
         #print("Frame time is :", timeit.default_timer() - starttime)
+        # FOR CONV 2D
+        ###state = torch.tensor(np.array([observation_screen]),dtype=torch.float,device=self.actor.device)
+        # FOR CONV 3D
         state = torch.tensor(np.array([observation_screen]),dtype=torch.float,device=self.actor.device)
         #print("Frame time is :", timeit.default_timer() - starttime)
         #state =state.to(self.actor.device)
         #print("Frame time is :", timeit.default_timer() - starttime)
+        
         dist=self.actor(state)
         
         #print("Frame time is :", timeit.default_timer() - starttime)
-
+        
         value=self.critic(state)
         #print('VALUE',value)
         #print(dist.probs)
@@ -305,6 +310,7 @@ class Agent:
                 #printt('states',states)
                 printt('old_probs',old_probs)
                 printt('actions',actions)
+                
                 dist = self.actor(states)
                 critic_value = self.critic(states)
                 critic_value = torch.squeeze(critic_value)

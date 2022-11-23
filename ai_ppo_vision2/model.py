@@ -41,6 +41,7 @@ class ActorNetwork(nn.Module):
     def __init__(self,sizes,trial=None):
         super(ActorNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
+        '''
         self.actor = nn.Sequential(
             nn.Conv3d(3, 32, 3, stride=2, padding=1),
             nn.Flatten(3,4),
@@ -55,6 +56,37 @@ class ActorNetwork(nn.Module):
             nn.Linear(250, SIZES[-1]),
             nn.Softmax(dim=-1)
         )
+        '''
+        
+        self.actor = nn.Sequential(
+            nn.Conv2d(1+PREV_FRAME_NUMBER, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(3, 3),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(3, 3),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Flatten(),
+            #nn.Linear(32,250),
+            nn.Linear(16*(1+PREV_FRAME_NUMBER),16),
+            nn.ReLU(),
+            nn.Linear(16, SIZES[-1]),
+            nn.Softmax(dim=-1)
+        )
+        
+        '''
+        self.actor = nn.Sequential(
+            nn.MaxPool2d(2, 2),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Flatten(),
+            #nn.Linear(32,250),
+            nn.Linear(768*(1+PREV_FRAME_NUMBER),250),
+            nn.ReLU(),
+            nn.Linear(250, SIZES[-1]),
+            nn.Softmax(dim=-1)
+        )
+        '''
         if OPTUNA and OPTUNA_MODEL:
             self.actor = optuna_get_model(trial,is_actor=True)
         lr = LEARNING_RATE
@@ -74,14 +106,28 @@ class ActorNetwork(nn.Module):
             screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
             for x1,y1,x2,y2,fish_type in frame:
                 screen[y1:y2,x1:x2,fish_type] = 1
+            # GRAY SCALE IMAGE
+            screen = screen.astype('float32')
+            screen = cv.cvtColor(screen, cv.COLOR_BGR2GRAY)
+            screen = cv.resize(screen,dsize=window_resize)
             if SHOW_STATE_SCREEN:
-                showscreen = screen.astype('float')
-                cv.imshow('frame',showscreen[:,:,::-1])
+                
+                showscreen = cv.resize(screen,dsize=(200,200))
+                #showscreen = screen.astype('float32')
+                #showscreen = cv.cvtColor(showscreen, cv.COLOR_BGR2GRAY)
+                cv.imshow('frame',showscreen[:,:])
                 cv.waitKey(1)
-            screen = screen.swapaxes(0,2)
+            #screen = screen.swapaxes(0,2)
+            screen = screen.swapaxes(0,1)
+            
+            #add this for grayscale
+            
+
+
+
             screens.append(screen)
-        screen = np.stack(screens,axis=3)
-        
+        #screen = np.stack(screens,axis=3)
+        screen = np.array(screens)
         return screen
     def forward(self,state):
         #print(state)
@@ -102,6 +148,7 @@ class CriticNetwork(nn.Module):
     def __init__(self,sizes,trial=None):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
+        '''
         self.critic = nn.Sequential(
             nn.Conv3d(3, 32, 3, stride=2, padding=1),
             nn.Flatten(3,4),
@@ -114,6 +161,21 @@ class CriticNetwork(nn.Module):
             nn.Linear(768*(1+PREV_FRAME_NUMBER),250),
             nn.ReLU(),
             nn.Linear(250, 1)
+        )
+        '''
+        self.critic = nn.Sequential(
+            nn.Conv2d(1+PREV_FRAME_NUMBER, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(3, 3),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(3, 3),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Flatten(),
+            #nn.Linear(32,250),
+            nn.Linear(16*(1+PREV_FRAME_NUMBER),16),
+            nn.ReLU(),
+            nn.Linear(16, 1)
         )
         if OPTUNA and OPTUNA_MODEL:
             self.critic = optuna_get_model(trial,is_actor=False)
