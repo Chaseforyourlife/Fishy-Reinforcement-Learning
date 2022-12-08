@@ -58,21 +58,24 @@ class ActorNetwork(nn.Module):
         )
         '''
         
-        self.actor = nn.Sequential(
-            nn.Conv2d(1+PREV_FRAME_NUMBER, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(3, 3),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(3, 3),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.Flatten(),
-            #nn.Linear(32,250),
-            nn.Linear(16*(1+PREV_FRAME_NUMBER),16),
-            nn.ReLU(),
-            nn.Linear(16, SIZES[-1]),
-            nn.Softmax(dim=-1)
-        )
+        if GRAYSCALE:
+            self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 32, 3, stride=2, padding=1)
+        elif not GRAYSCALE:
+            self.conv1 = nn.Conv2d(3*(1+PREV_FRAME_NUMBER), 8, 3, stride=2, padding=1)
+        self.pool1 = nn.MaxPool2d(3, 3)
+        
+        self.conv2 = nn.Conv2d(8, 16, 3, stride=2, padding=1)
+        self.pool2 = nn.MaxPool2d(3, 3)
+        self.conv3 = nn.Conv2d(16, 32, 3, stride=2, padding=1)
+        self.pool3 = nn.MaxPool2d(2, 2)
+        self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
+        self.flat = nn.Flatten()
+        #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
+        self.lin1 = nn.Linear(288,1000)
+        self.relu = nn.ReLU()
+        self.lin2 = nn.Linear(1000, SIZES[-1])
+        self.soft = nn.Softmax(dim=-1)
+
         
         '''
         self.actor = nn.Sequential(
@@ -108,33 +111,84 @@ class ActorNetwork(nn.Module):
                 screen[y1:y2,x1:x2,fish_type] = 1
             # GRAY SCALE IMAGE
             screen = screen.astype('float32')
-            screen = cv.cvtColor(screen, cv.COLOR_BGR2GRAY)
+            if GRAYSCALE:
+                screen = cv.cvtColor(screen, cv.COLOR_BGR2GRAY)
             screen = cv.resize(screen,dsize=window_resize)
             if SHOW_STATE_SCREEN:
-                
-                showscreen = cv.resize(screen,dsize=(200,200))
+                showscreen=screen
+                #showscreen = cv.resize(screen,dsize=(200,200))
                 #showscreen = screen.astype('float32')
                 #showscreen = cv.cvtColor(showscreen, cv.COLOR_BGR2GRAY)
                 cv.imshow('frame',showscreen[:,:])
                 cv.waitKey(1)
-            #screen = screen.swapaxes(0,2)
-            screen = screen.swapaxes(0,1)
-            
+            if GRAYSCALE:
+                screen = screen.swapaxes(0,1)
+            elif not GRAYSCALE:
+                screen = screen.swapaxes(0,2)
             #add this for grayscale
             
 
 
-
+        
             screens.append(screen)
-        #screen = np.stack(screens,axis=3)
-        screen = np.array(screens)
+        screen = np.concatenate(screens,axis=0)
         return screen
-    def forward(self,state):
-        #print(state)
-        #state = self.state_to_screen(state)
-        #print(f'STATE: {state}')
-        dist = self.actor(state)
-        dist=Categorical(dist)
+    def forward(self,value):
+        #value is state
+        
+        #print(state.shape)
+        value = self.conv1(value)
+        printt(value.shape)
+        if SHOW_CONV1:
+            
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',instate[i])
+        value = self.pool1(value)
+        printt(value.shape)
+        
+        value = self.conv2(value)
+        printt(value.shape,'after conv2')
+        if SHOW_CONV2:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        value = self.pool2(value)
+        printt(value.shape,'after pool2')
+        if SHOW_POOL2:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        value = self.conv3(value)
+        printt(value.shape,'after conv3')
+        
+        if SHOW_CONV3:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        
+        #value = self.pool3(value)
+        printt(value.shape,'after pool3')
+        if SHOW_POOL3:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+          
+        #value = self.conv4(value)
+        printt(value.shape,'after conv4')
+        if SHOW_CONV4:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        
+        value = self.flat(value)
+        printt(value.shape,'after flatten')
+        value = self.lin1(value)
+        value = self.relu(value)
+        value = self.lin2(value)
+        value = self.soft(value)
+        #dist = self.actor(state)
+        dist=Categorical(value)
         return dist
 
     def save_checkpoint(self):
@@ -148,35 +202,25 @@ class CriticNetwork(nn.Module):
     def __init__(self,sizes,trial=None):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
-        '''
-        self.critic = nn.Sequential(
-            nn.Conv3d(3, 32, 3, stride=2, padding=1),
-            nn.Flatten(3,4),
-            nn.MaxPool2d(3, 3),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(3, 3),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.Flatten(),
-            #nn.Linear(32,250),
-            nn.Linear(768*(1+PREV_FRAME_NUMBER),250),
-            nn.ReLU(),
-            nn.Linear(250, 1)
-        )
-        '''
-        self.critic = nn.Sequential(
-            nn.Conv2d(1+PREV_FRAME_NUMBER, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(3, 3),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(3, 3),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
-            nn.Flatten(),
-            #nn.Linear(32,250),
-            nn.Linear(16*(1+PREV_FRAME_NUMBER),16),
-            nn.ReLU(),
-            nn.Linear(16, 1)
-        )
+
+        
+        if GRAYSCALE:
+            self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 32, 3, stride=2, padding=1)
+        elif not GRAYSCALE:
+            self.conv1 = nn.Conv2d(3*(1+PREV_FRAME_NUMBER), 8, 3, stride=2, padding=1)
+        self.pool1 = nn.MaxPool2d(3, 3)
+        
+        self.conv2 = nn.Conv2d(8, 16, 3, stride=2, padding=1)
+        self.pool2 = nn.MaxPool2d(3, 3)
+        self.conv3 = nn.Conv2d(16, 32, 3, stride=2, padding=1)
+        self.pool3 = nn.MaxPool2d(3, 3)
+        self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
+        self.flat = nn.Flatten()
+        #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
+        self.lin1 = nn.Linear(288,1000)
+        self.relu = nn.ReLU()
+        self.lin2 = nn.Linear(1000, 1)
+       
         if OPTUNA and OPTUNA_MODEL:
             self.critic = optuna_get_model(trial,is_actor=False)
         self.optimzier = optim.Adam(self.parameters(),lr=LEARNING_RATE)
@@ -184,9 +228,21 @@ class CriticNetwork(nn.Module):
         self.to(self.device)
     
     def forward(self,state):
-        value = self.critic(state)
-        #print(self.critic)
-        #print(value)
+        value = self.conv1(state)
+        
+        value = self.pool1(value)
+        value = self.conv2(value)
+        value = self.pool2(value)
+        value = self.conv3(value)
+        
+        #value = self.pool3(value)
+        #value = self.conv4(value)
+        
+        value = self.flat(value)
+        value = self.lin1(value)
+        value = self.relu(value)
+        value = self.lin2(value)
+        
         return value
 
     def save_checkpoint(self):

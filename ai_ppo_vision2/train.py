@@ -40,7 +40,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
     recent_fish_eaten_deque = deque(maxlen=50)
     plot_recent_fish_eaten_means = []
     main_agent = Agent(trial)
-    print(main_agent.critic.critic)
+    #print(main_agent.critic.critic)
     if LOAD_MODEL:
         try:
             main_agent.load_models()
