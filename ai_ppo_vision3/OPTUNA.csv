@@ -1,0 +1,8 @@
+	MODEL	LR	GAMMA	BATCH_SIZE	OPTIM	EPOCHS	DROPOUT
+"Trial x 100, 200 minimize"	"2,1000x1000"	0.0003	"[.90,.99]"	"[10,1000]"	Adam	1	0
+Results			0.975	15			
+	MODEL	LR	GAMMA	BATCH_SIZE	OPTIM	EPOCHS	DROPOUT
+"Trial x 100, 200 minimize"	"2,1000x1000"	"[.00001,.001]"	0.975	15	Adam	1	0
+Results		0.0006					
+"Trial x 100, 200 minimize"	"2,1000x1000"	0.0006	0.975	15	Adam	1	0
+Results							
