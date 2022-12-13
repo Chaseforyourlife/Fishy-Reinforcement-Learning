@@ -26,8 +26,8 @@ SHOW_STATE_SCREEN = True
 
 window_size = (550,400)
 #reshape, but maintain width ratio
-window_resize =  (550,400) #(225,225)
-MAX_FISH = 8
+window_resize = (75,75)#(225,225)# (550,400) #(225,225)
+MAX_FISH = 1
 MAX_FISH_SPEED = 6 #6
 MIN_FISH_SPEED = 2 #2
 #MAX_FISH_SIZE = 0#150 #30 #150
@@ -58,7 +58,7 @@ GAMMA = .975 #0.90 # must be less than 1, originally .99
 REWARD_PROXIMITY=False
 REWARD_EAT=True
 
-LEARNING_RATE = .00006#.00006#.0006#.01#.0003#.0003#.0003#.001
+LEARNING_RATE = .0003#.00006#.00006#.0006#.01#.0003#.0003#.0003#.001
 
 SRN_SZE = 150
 
@@ -81,10 +81,10 @@ SIZES=[INPUT_SIZE,OUTPUT_SIZE]
 
 
 SHOW_CONV1 = False
-SHOW_POOL1 = False
+SHOW_POOL1 = True
 SHOW_CONV2 = False
 SHOW_POOL2 = False
-SHOW_CONV3 = True
+SHOW_CONV3 = False
 SHOW_POOL3 = False
 SHOW_CONV4 = False
 
