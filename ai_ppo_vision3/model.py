@@ -49,15 +49,13 @@ class ActorNetwork(nn.Module):
             self.conv1 = nn.Conv2d(3*(1+PREV_FRAME_NUMBER), 32, 3, stride=2, padding=1)
         self.pool1 = nn.MaxPool2d(3, 3)
         
-        #self.conv2 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
         self.pool2 = nn.MaxPool2d(3, 3)
-        #self.conv3 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
         self.pool3 = nn.MaxPool2d(3, 3)
         #self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
-        self.flat = nn.Flatten()
-        
-        #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(14208,1000)
+        self.flat = nn.Flatten()        #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
+        self.lin1 = nn.Linear(15840,1000)
         self.lin2 = nn.Linear(1000,250)
         self.relu = nn.ReLU()
         self.lin3 = nn.Linear(250, SIZES[-1])
@@ -97,13 +95,13 @@ class ActorNetwork(nn.Module):
             #cv.imshow(f'screen combined',cv.resize(combined,dsize=(SRN_SZE,SRN_SZE),interpolation=0))
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
-        #value = self.conv2(value)
+        value = self.conv2(value)
         printt(value.shape,'after conv2')
         if SHOW_CONV2:
             instate = value.clone().to('cpu').detach().numpy()[0]
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
-        #value = self.pool2(value)
+        value = self.pool2(value)
         printt(value.shape,'after pool2')
         if SHOW_POOL2:
             instate = value.clone().to('cpu').detach().numpy()[0]
@@ -204,14 +202,14 @@ class CriticNetwork(nn.Module):
             self.conv1 = nn.Conv2d(3*(1+PREV_FRAME_NUMBER),32, 3, stride=2, padding=1)
         self.pool1 = nn.MaxPool2d(3, 3)
         
-        #self.conv2 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
         self.pool2 = nn.MaxPool2d(3, 3)
-        #self.conv3 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
         self.pool3 = nn.MaxPool2d(3, 3)
         self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
         self.flat = nn.Flatten()
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(14208,1000)
+        self.lin1 = nn.Linear(15840,1000)
         self.relu = nn.ReLU()
         self.lin2 = nn.Linear(1000,250)
         self.lin3 = nn.Linear(250, 1)
@@ -226,8 +224,8 @@ class CriticNetwork(nn.Module):
         #sprint(value.shape)
         value = self.conv1(value)
         value = self.pool1(value)
-        #value = self.conv2(value)
-        #value = self.pool2(value)
+        value = self.conv2(value)
+        value = self.pool2(value)
         #value = self.conv3(value)
         
         #value = self.pool3(value)
