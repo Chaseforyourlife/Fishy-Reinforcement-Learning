@@ -57,7 +57,7 @@ class ActorNetwork(nn.Module):
         self.flat = nn.Flatten()
         
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(512,1000)
+        self.lin1 = nn.Linear(4608,1000)
         self.lin2 = nn.Linear(1000,250)
         self.relu = nn.ReLU()
         self.lin3 = nn.Linear(250, SIZES[-1])
@@ -87,7 +87,7 @@ class ActorNetwork(nn.Module):
             
             instate = value.clone().to('cpu').detach().numpy()[0]
             for i in range(len(instate)):
-                cv.imshow(f'screen{i}',instate[i])
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         value = self.pool1(value)
         printt(value.shape)
         if SHOW_POOL1:
@@ -103,7 +103,7 @@ class ActorNetwork(nn.Module):
             instate = value.clone().to('cpu').detach().numpy()[0]
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
-        value = self.pool2(value)
+        #value = self.pool2(value)
         printt(value.shape,'after pool2')
         if SHOW_POOL2:
             instate = value.clone().to('cpu').detach().numpy()[0]
@@ -146,6 +146,7 @@ class ActorNetwork(nn.Module):
         screens=[]
         for frame_num,frame in enumerate(state):
             #print(frame)
+            
             screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
             for x1,y1,x2,y2,fish_type in frame:
                 screen[y1:y2,x1:x2,fish_type] = 1
@@ -201,7 +202,7 @@ class CriticNetwork(nn.Module):
         self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
         self.flat = nn.Flatten()
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(512,1000)
+        self.lin1 = nn.Linear(4608,1000)
         self.relu = nn.ReLU()
         self.lin2 = nn.Linear(1000,250)
         self.lin3 = nn.Linear(250, 1)
@@ -217,7 +218,7 @@ class CriticNetwork(nn.Module):
         value = self.conv1(value)
         value = self.pool1(value)
         #value = self.conv2(value)
-        value = self.pool2(value)
+        #value = self.pool2(value)
         #value = self.conv3(value)
         
         #value = self.pool3(value)
