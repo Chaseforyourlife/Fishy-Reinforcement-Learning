@@ -42,7 +42,7 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
             if REWARD_PROXIMITY:
                 reward+=temp_reward
             pass
-    #print(flipped)
+    #printt(flipped)
 
     if flipped:
         reward -=.2
@@ -71,7 +71,7 @@ def calculate_reward(fishy,school,fish_eaten,win,flipped,stopped,state_old):
     if win:
         #reward += 1000
         pass
-    #print('REWARD',reward)
+    #printt('REWARD',reward)
     return reward
 
 
@@ -206,7 +206,6 @@ class Agent:
     def get_action(self,observation):
        
         starttime = timeit.default_timer()
-        print(len(observation))
         observation_screen = self.actor.state_to_screen(observation)
 
         #print("Frame time is :", timeit.default_timer() - starttime)

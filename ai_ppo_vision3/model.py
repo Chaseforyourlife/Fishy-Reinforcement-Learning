@@ -80,7 +80,7 @@ class ActorNetwork(nn.Module):
     def forward(self,value):
         #value is state
         
-        print(value.shape)
+        printt(value.shape)
         value = self.conv1(value)
         printt(value.shape)
         if SHOW_CONV1:
@@ -132,7 +132,7 @@ class ActorNetwork(nn.Module):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         
         value = self.flat(value)
-        print(value.shape,'after flatten')
+        
         value = self.lin1(value)
         value = self.relu(value)
         value = self.lin2(value)
@@ -143,18 +143,16 @@ class ActorNetwork(nn.Module):
         dist=Categorical(value)
         return dist
     def state_to_screen(self,state):
-        print(len(state))
+    
         screens=[]
         for frame_num,frame in enumerate(state):
-            #print(frame)
+           
             RGBscreens = [np.zeros(shape=(window_size[1],window_size[0],1),dtype='bool') for _ in range(3)]
-            print(RGBscreens[0].shape)
             for x1,y1,x2,y2,fish_type in frame:
                 RGBscreens[fish_type][y1:y2,x1:x2] = 1
-            #print(RGBscreens[0].shape)
+          
             # GRAY SCALE IMAGE
             screen = np.vstack(RGBscreens)
-            #print(screen.shape)
             screen = screen.astype('float32')
             '''
             if GRAYSCALE:
@@ -176,13 +174,13 @@ class ActorNetwork(nn.Module):
             
 
 
-            print(screen.shape)
+          
             screens.append(screen)
         if not GRAYSCALE:
             screen = np.concatenate(screens,axis=0)
         elif GRAYSCALE:
             screen = np.stack(screens,axis=0)
-        print(screen.shape)
+       
 
         return screen
     
