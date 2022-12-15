@@ -55,10 +55,12 @@ class ActorNetwork(nn.Module):
         self.pool3 = nn.MaxPool2d(3, 3)
         #self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
         self.flat = nn.Flatten()
+        
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(1875,250)
+        self.lin1 = nn.Linear(512,1000)
+        self.lin2 = nn.Linear(1000,250)
         self.relu = nn.ReLU()
-        self.lin2 = nn.Linear(250, SIZES[-1])
+        self.lin3 = nn.Linear(250, SIZES[-1])
         self.soft = nn.Softmax(dim=-1)
 
         
@@ -79,7 +81,7 @@ class ActorNetwork(nn.Module):
         #value is state
         
         #print(value.shape)
-        #value = self.conv1(value)
+        value = self.conv1(value)
         printt(value.shape)
         if SHOW_CONV1:
             
@@ -92,7 +94,7 @@ class ActorNetwork(nn.Module):
             instate = value.clone().to('cpu').detach().numpy()[0]
 
             combined = instate.swapaxes(0,2)
-            cv.imshow(f'screen combined',cv.resize(combined,dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+            #cv.imshow(f'screen combined',cv.resize(combined,dsize=(SRN_SZE,SRN_SZE),interpolation=0))
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         #value = self.conv2(value)
@@ -101,7 +103,7 @@ class ActorNetwork(nn.Module):
             instate = value.clone().to('cpu').detach().numpy()[0]
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
-        #value = self.pool2(value)
+        value = self.pool2(value)
         printt(value.shape,'after pool2')
         if SHOW_POOL2:
             instate = value.clone().to('cpu').detach().numpy()[0]
@@ -134,6 +136,8 @@ class ActorNetwork(nn.Module):
         value = self.lin1(value)
         value = self.relu(value)
         value = self.lin2(value)
+        value = self.relu(value)
+        value = self.lin3(value)
         value = self.soft(value)
         #dist = self.actor(state)
         dist=Categorical(value)
@@ -197,9 +201,10 @@ class CriticNetwork(nn.Module):
         self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
         self.flat = nn.Flatten()
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(1875,250)
+        self.lin1 = nn.Linear(512,1000)
         self.relu = nn.ReLU()
-        self.lin2 = nn.Linear(250, 1)
+        self.lin2 = nn.Linear(1000,250)
+        self.lin3 = nn.Linear(250, 1)
        
         if OPTUNA and OPTUNA_MODEL:
             self.critic = optuna_get_model(trial,is_actor=False)
@@ -209,10 +214,10 @@ class CriticNetwork(nn.Module):
     
     def forward(self,value):
         #sprint(value.shape)
-        #value = self.conv1(value)
+        value = self.conv1(value)
         value = self.pool1(value)
         #value = self.conv2(value)
-        #value = self.pool2(value)
+        value = self.pool2(value)
         #value = self.conv3(value)
         
         #value = self.pool3(value)
@@ -222,7 +227,8 @@ class CriticNetwork(nn.Module):
         value = self.lin1(value)
         value = self.relu(value)
         value = self.lin2(value)
-        
+        value = self.relu(value)
+        value = self.lin3(value)
         return value
 
     def save_checkpoint(self):
