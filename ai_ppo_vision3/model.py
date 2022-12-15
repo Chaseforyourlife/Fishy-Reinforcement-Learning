@@ -57,7 +57,7 @@ class ActorNetwork(nn.Module):
         self.flat = nn.Flatten()
         
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(4608,1000)
+        self.lin1 = nn.Linear(14208,1000)
         self.lin2 = nn.Linear(1000,250)
         self.relu = nn.ReLU()
         self.lin3 = nn.Linear(250, SIZES[-1])
@@ -80,7 +80,7 @@ class ActorNetwork(nn.Module):
     def forward(self,value):
         #value is state
         
-        #print(value.shape)
+        print(value.shape)
         value = self.conv1(value)
         printt(value.shape)
         if SHOW_CONV1:
@@ -93,7 +93,7 @@ class ActorNetwork(nn.Module):
         if SHOW_POOL1:
             instate = value.clone().to('cpu').detach().numpy()[0]
 
-            combined = instate.swapaxes(0,2)
+            #combined = instate.swapaxes(0,2)
             #cv.imshow(f'screen combined',cv.resize(combined,dsize=(SRN_SZE,SRN_SZE),interpolation=0))
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
@@ -132,7 +132,7 @@ class ActorNetwork(nn.Module):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         
         value = self.flat(value)
-        printt(value.shape,'after flatten')
+        print(value.shape,'after flatten')
         value = self.lin1(value)
         value = self.relu(value)
         value = self.lin2(value)
@@ -143,17 +143,23 @@ class ActorNetwork(nn.Module):
         dist=Categorical(value)
         return dist
     def state_to_screen(self,state):
+        print(len(state))
         screens=[]
         for frame_num,frame in enumerate(state):
             #print(frame)
-            
-            screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
+            RGBscreens = [np.zeros(shape=(window_size[1],window_size[0],1),dtype='bool') for _ in range(3)]
+            print(RGBscreens[0].shape)
             for x1,y1,x2,y2,fish_type in frame:
-                screen[y1:y2,x1:x2,fish_type] = 1
+                RGBscreens[fish_type][y1:y2,x1:x2] = 1
+            #print(RGBscreens[0].shape)
             # GRAY SCALE IMAGE
+            screen = np.vstack(RGBscreens)
+            #print(screen.shape)
             screen = screen.astype('float32')
+            '''
             if GRAYSCALE:
                 screen = cv.cvtColor(screen, cv.COLOR_BGR2GRAY)
+            '''
             screen = cv.resize(screen,dsize=window_resize)
             if SHOW_STATE_SCREEN and frame_num==0:
                 showscreen=screen
@@ -164,15 +170,20 @@ class ActorNetwork(nn.Module):
                 cv.waitKey(1)
             if GRAYSCALE:
                 screen = screen.swapaxes(0,1)
-            elif not GRAYSCALE:
-                screen = screen.swapaxes(0,2)
+            #elif not GRAYSCALE:
+            #    screen = screen.swapaxes(0,2)
             #add this for grayscale
             
 
 
-        
+            print(screen.shape)
             screens.append(screen)
-        screen = np.concatenate(screens,axis=0)
+        if not GRAYSCALE:
+            screen = np.concatenate(screens,axis=0)
+        elif GRAYSCALE:
+            screen = np.stack(screens,axis=0)
+        print(screen.shape)
+
         return screen
     
 
@@ -202,7 +213,7 @@ class CriticNetwork(nn.Module):
         self.conv4 = nn.Conv2d(32, 32, 2, stride=2, padding=1)
         self.flat = nn.Flatten()
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin1 = nn.Linear(4608,1000)
+        self.lin1 = nn.Linear(14208,1000)
         self.relu = nn.ReLU()
         self.lin2 = nn.Linear(1000,250)
         self.lin3 = nn.Linear(250, 1)

@@ -26,7 +26,7 @@ SHOW_STATE_SCREEN = True
 
 window_size = (550,400)
 #reshape, but maintain width ratio
-window_resize = (75,75)#(225,225)# (550,400) #(225,225)
+window_resize = (75,75*3)#(75,75)#(225,225)# (550,400) #(225,225)
 MAX_FISH = 1
 MAX_FISH_SPEED = 6 #6
 MIN_FISH_SPEED = 2 #2
@@ -39,7 +39,7 @@ MIN_FISH_SIZE = -25
 GAMES_BEFORE_SAVE = 0
 #MAX_FISH_CONSUMED = MAX_FISH_SIZE+5
 
-GRAYSCALE = False
+GRAYSCALE = True
 
     
 
@@ -80,15 +80,15 @@ else:
 SIZES=[INPUT_SIZE,OUTPUT_SIZE]
 
 
-SHOW_CONV1 = False
-SHOW_POOL1 = True
+SHOW_CONV1 = True
+SHOW_POOL1 = False
 SHOW_CONV2 = False
 SHOW_POOL2 = False
 SHOW_CONV3 = False
 SHOW_POOL3 = False
 SHOW_CONV4 = False
 
-PREV_FRAME_NUMBER = 0
+PREV_FRAME_NUMBER = 1
 
 FRAME_SKIP = False
 

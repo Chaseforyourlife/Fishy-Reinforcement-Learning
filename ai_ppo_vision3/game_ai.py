@@ -206,6 +206,7 @@ class Agent:
     def get_action(self,observation):
        
         starttime = timeit.default_timer()
+        print(len(observation))
         observation_screen = self.actor.state_to_screen(observation)
 
         #print("Frame time is :", timeit.default_timer() - starttime)
