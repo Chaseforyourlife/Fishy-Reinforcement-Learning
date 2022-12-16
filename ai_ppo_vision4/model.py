@@ -43,6 +43,16 @@ class ActorNetwork(nn.Module):
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
       
         
+        self.paper_conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 8, stride=4, padding=1)
+        self.paper_conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)
+        self.paper_flat = nn.Flatten()
+        self.paper_lin1 = nn.Linear(3200,256)
+        self.paper_lin2 = nn.Linear(256,SIZES[-1])
+        
+
+
+
+
         if GRAYSCALE:
             self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 8, 3, stride=1, padding=1)
         elif not GRAYSCALE:
@@ -78,7 +88,7 @@ class ActorNetwork(nn.Module):
     
     def forward(self,value):
         #value is state
-        
+        '''
         printt(value.shape)
         value = self.conv1(value)
         printt(value.shape)
@@ -140,6 +150,28 @@ class ActorNetwork(nn.Module):
         value = self.lin3(value)
         value = self.soft(value)
         #dist = self.actor(state)
+        '''
+        value = self.paper_conv1(value)
+        value = self.relu(value)
+        if SHOW_CONV1:
+            
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        value = self.paper_conv2(value)
+        value = self.relu(value)
+        if SHOW_CONV2:
+            
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        value = self.flat(value)
+        value = self.paper_lin1(value)
+        value = self.paper_lin2(value)
+        value = self.soft(value)
+
+
+
         dist=Categorical(value)
         return dist
     def state_to_screen(self,state):
@@ -211,6 +243,11 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
 
+        self.paper_conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 8, stride=4, padding=1)
+        self.paper_conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)
+        self.paper_flat = nn.Flatten()
+        self.paper_lin1 = nn.Linear(3200,256)
+        self.paper_lin2 = nn.Linear(256,1)
         
         if GRAYSCALE:
             self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 8, 3, stride=1, padding=1)
@@ -238,6 +275,15 @@ class CriticNetwork(nn.Module):
         self.to(self.device)
     
     def forward(self,value):
+        value = self.paper_conv1(value)
+        value = self.relu(value)
+        value = self.paper_conv2(value)
+        value = self.relu(value)
+        value = self.flat(value)
+        value = self.paper_lin1(value)
+        value = self.paper_lin2(value)
+        return value
+        '''
         #sprint(value.shape)
         value = self.conv1(value)
         value = self.pool1(value)
@@ -256,6 +302,7 @@ class CriticNetwork(nn.Module):
         value = self.lin2(value)
         value = self.relu(value)
         value = self.lin3(value)
+        '''
         return value
 
     def save_checkpoint(self):
