@@ -167,6 +167,7 @@ class ActorNetwork(nn.Module):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         value = self.flat(value)
         value = self.paper_lin1(value)
+        value = self.relu(value)
         value = self.paper_lin2(value)
         value = self.soft(value)
 
@@ -281,6 +282,7 @@ class CriticNetwork(nn.Module):
         value = self.relu(value)
         value = self.flat(value)
         value = self.paper_lin1(value)
+        value = self.relu(value)
         value = self.paper_lin2(value)
         return value
         '''
