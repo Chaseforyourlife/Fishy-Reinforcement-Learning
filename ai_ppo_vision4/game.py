@@ -58,22 +58,31 @@ class Fishy:
     
     if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
       self.handle_move([0,0,0,0,0,1,0,0,0])
+      direction = 5
     elif keys[pygame.K_UP] and keys[pygame.K_RIGHT]:
       self.handle_move([0,0,0,0,0,0,1,0,0])
+      direction = 6
     elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
       self.handle_move([0,0,0,0,0,0,0,1,0])
+      direction = 7
     elif keys[pygame.K_DOWN] and keys[pygame.K_LEFT]:
       self.handle_move([0,0,0,0,0,0,0,0,1])
+      direction = 8
     elif keys[pygame.K_LEFT]:
       self.handle_move([1,0,0,0,0,0,0,0,0])
+      direction = 0
     elif keys[pygame.K_RIGHT]:
       self.handle_move([0,1,0,0,0,0,0,0,0])
+      direction = 1
     elif keys[pygame.K_UP]:
       self.handle_move([0,0,1,0,0,0,0,0,0])
+      direction = 2
     elif keys[pygame.K_DOWN]:
       self.handle_move([0,0,0,1,0,0,0,0,0])
+      direction = 3
     else:
       self.handle_move([0,0,0,0,1,0,0,0,0])
+      direction = 4
     '''
     elif keys[pygame.K_LEFT]:
       self.handle_move([1,0,0,0,0])
@@ -86,7 +95,9 @@ class Fishy:
     else:
       self.handle_move([0,0,0,0,0])
     '''
+    return direction
   def handle_move(self,direction=None):
+    
     if type(direction)==int:
       move = [0,0,0,0,0,0,0,0,0]
       move[direction]=1 
@@ -150,7 +161,7 @@ class Fishy:
       #remove later
       self.x_speed = 0
       flipped = True
-  
+
     elif self.x + self.width/2 >= window_size[0]:
       #self.x = 0 - self.width/2
       self.x = window_size[0]-self.width/2

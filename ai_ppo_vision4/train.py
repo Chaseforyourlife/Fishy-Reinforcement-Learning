@@ -98,7 +98,11 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
             move,prob,val = main_agent.get_action(state_old)
             
             #handle move
-            main_fishy.handle_move(move)
+            if ACCEPT_USER_MOVES and True in pygame.key.get_pressed():
+                move = main_fishy.handle_keys()
+            else:
+                main_fishy.handle_move(move)
+
             #handle main_fishy movement
             flipped,stopped = main_fishy.move()
             #check if fishy collided with any fish in the main_school

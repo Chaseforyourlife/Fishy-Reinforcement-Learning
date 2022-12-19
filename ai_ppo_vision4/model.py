@@ -43,10 +43,13 @@ class ActorNetwork(nn.Module):
         self.checkpoint_file = os.path.join('model','ppo_actor_model')
       
         
-        self.paper_conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 8, stride=4, padding=1)
+        if GRAYSCALE:
+            self.paper_conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 8, stride=4, padding=1)
+        elif not GRAYSCALE:
+            self.paper_conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4)*(1+PREV_FRAME_NUMBER), 16, 8, stride=4, padding=1)
         self.paper_conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)
         self.paper_flat = nn.Flatten()
-        self.paper_lin1 = nn.Linear(3200,256)
+        self.paper_lin1 = nn.Linear(23328,256)
         self.paper_lin2 = nn.Linear(256,SIZES[-1])
         
 
@@ -56,7 +59,7 @@ class ActorNetwork(nn.Module):
         if GRAYSCALE:
             self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 8, 3, stride=1, padding=1)
         elif not GRAYSCALE:
-            self.conv1 = nn.Conv2d(3*(1+PREV_FRAME_NUMBER), 8, 3, stride=1, padding=1)
+            self.conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4) *(1+PREV_FRAME_NUMBER), 8, 3, stride=1, padding=1)
         self.pool1 = nn.MaxPool2d(3, 3)
         
         self.conv2 = nn.Conv2d(8, 16, 3, stride=1, padding=1)
@@ -187,36 +190,57 @@ class ActorNetwork(nn.Module):
             # GRAY SCALE IMAGE
             screen = np.vstack(RGBscreens)
             '''
-            screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
+            if not CENTER_AGENT:
+                screen = np.zeros(shape=(window_size[1],window_size[0],3),dtype='bool')
+            elif CENTER_AGENT:
+                screen = np.zeros(shape=(window_size[1]*2,window_size[0]*2,4),dtype='bool')
+            # get fishy coords for centering
             for x1,y1,x2,y2,fish_type in frame:
-                screen[y1:y2,x1:x2,fish_type] = 1
                 if fish_type == 2:
                     fishy_coords = (x1,y1,x2,y2)
-            screen = screen.astype('float32')
+                fishy_center_w = (fishy_coords[0]+fishy_coords[2])/2
+                fishy_center_h = (fishy_coords[1]+fishy_coords[3])/2
+                offset_w= int((window_size[0]/2) + (window_size[0]/2-fishy_center_w))
+                offset_h= int((window_size[1]/2) + (window_size[1]/2-fishy_center_h))
+            # write fish to screen as boxes
+            for x1,y1,x2,y2,fish_type in frame:
+                if not CENTER_AGENT:
+                    screen[y1:y2,x1:x2,fish_type] = 1
+                elif CENTER_AGENT:
+                    #already integers
+                    screen[y1+offset_h:y2+offset_h,x1+offset_w:x2+offset_w,fish_type] = 1
+            
             
             if GRAYSCALE:
                 screen = cv.cvtColor(screen, cv.COLOR_BGR2GRAY)
-            if CENTER_AGENT:
+            if CENTER_AGENT and GRAYSCALE:
+                centered_screen = np.ones(shape=(window_size[1]*2,window_size[0]*2))
+                
+                centered_screen[offset_h:offset_h+window_size[1] , offset_w:offset_w+window_size[0]] = screen
+                screen = centered_screen
+                
+            elif CENTER_AGENT and not GRAYSCALE:
                 centered_screen = np.ones(shape=(window_size[1]*2,window_size[0]*2))
                 fishy_center_w = (fishy_coords[0]+fishy_coords[2])/2
                 fishy_center_h = (fishy_coords[1]+fishy_coords[3])/2
                 offset_w= int((window_size[0]/2) + (window_size[0]/2-fishy_center_w))
                 offset_h= int((window_size[1]/2) + (window_size[1]/2-fishy_center_h))
-                centered_screen[offset_h:offset_h+window_size[1] , offset_w:offset_w+window_size[0]] = screen
-                screen = centered_screen
+                centered_screen[offset_h:offset_h+window_size[1] , offset_w:offset_w+window_size[0]] = 0
+                screen[:,:,3]=centered_screen
+            screen = screen.astype('float32')
             screen = cv.resize(screen,dsize=window_resize)
             if SHOW_STATE_SCREEN and frame_num==0:
                 showscreen=screen
                 #showscreen = cv.resize(screen,dsize=(200,200))
                 #showscreen = screen.astype('float32')
                 #showscreen = cv.cvtColor(showscreen, cv.COLOR_BGR2GRAY)
-                cv.imshow('frame',showscreen[:,:])
+                cv.imshow('frame',showscreen[:,:,:3])
                 cv.waitKey(1)
             
             if GRAYSCALE:
                 screen = screen.swapaxes(0,1)
-            #elif not GRAYSCALE:
-            #    screen = screen.swapaxes(0,2)
+            elif not GRAYSCALE:
+                screen = screen.swapaxes(0,2)
             #add this for grayscale
             
 
@@ -243,17 +267,19 @@ class CriticNetwork(nn.Module):
     def __init__(self,sizes,trial=None):
         super(CriticNetwork,self).__init__()
         self.checkpoint_file = os.path.join('model','ppo_critic_model')
-
-        self.paper_conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 8, stride=4, padding=1)
+        if GRAYSCALE:
+            self.paper_conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 8, stride=4, padding=1)
+        elif not GRAYSCALE:
+            self.paper_conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4)*(1+PREV_FRAME_NUMBER), 16, 8, stride=4, padding=1)
         self.paper_conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)
         self.paper_flat = nn.Flatten()
-        self.paper_lin1 = nn.Linear(3200,256)
+        self.paper_lin1 = nn.Linear(23328,256)
         self.paper_lin2 = nn.Linear(256,1)
         
         if GRAYSCALE:
             self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 8, 3, stride=1, padding=1)
         elif not GRAYSCALE:
-            self.conv1 = nn.Conv2d(3*(1+PREV_FRAME_NUMBER),8, 3, stride=1, padding=1)
+            self.conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4)*(1+PREV_FRAME_NUMBER),8, 3, stride=1, padding=1)
         self.pool1 = nn.MaxPool2d(3, 3)
         
         self.conv2 = nn.Conv2d(8, 16, 3, stride=1, padding=1)
