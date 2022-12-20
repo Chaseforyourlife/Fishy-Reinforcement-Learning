@@ -49,7 +49,7 @@ class ActorNetwork(nn.Module):
             self.paper_conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4)*(1+PREV_FRAME_NUMBER), 16, 8, stride=4, padding=1)
         self.paper_conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)
         self.paper_flat = nn.Flatten()
-        self.paper_lin1 = nn.Linear(23328,256)
+        self.paper_lin1 = nn.Linear(3136,256)
         self.paper_lin2 = nn.Linear(256,SIZES[-1])
         
 
@@ -68,7 +68,7 @@ class ActorNetwork(nn.Module):
         self.pool3 = nn.MaxPool2d(3, 3)
         #self.conv4 = nn.Conv2d(8, 8, 2, stride=1, padding=1)
         self.flat = nn.Flatten()        #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin0 = nn.Linear(10000,1500)
+        self.lin0 = nn.Linear(3200,1500)
         self.lin1 = nn.Linear(1500,1000)
         self.lin2 = nn.Linear(1000,250)
         self.relu = nn.ReLU()
@@ -90,6 +90,7 @@ class ActorNetwork(nn.Module):
         self.to(self.device)
     
     def forward(self,value):
+        #print(value.shape)
         #value is state
         '''
         printt(value.shape)
@@ -154,15 +155,16 @@ class ActorNetwork(nn.Module):
         value = self.soft(value)
         #dist = self.actor(state)
         '''
-        value = self.paper_conv1(value)
-        value = self.relu(value)
+        value = self.pool1(value)
+        #value = self.paper_conv1(value)
+        #value = self.relu(value)
         if SHOW_CONV1:
             
             instate = value.clone().to('cpu').detach().numpy()[0]
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
-        value = self.paper_conv2(value)
-        value = self.relu(value)
+        #value = self.paper_conv2(value)
+        #value = self.relu(value)
         if SHOW_CONV2:
             
             instate = value.clone().to('cpu').detach().numpy()[0]
@@ -182,6 +184,7 @@ class ActorNetwork(nn.Module):
     
         screens=[]
         for frame_num,frame in enumerate(state):
+            
             '''
             RGBscreens = [np.zeros(shape=(window_size[1],window_size[0],1),dtype='bool') for _ in range(3)]
             for x1,y1,x2,y2,fish_type in frame:
@@ -228,13 +231,13 @@ class ActorNetwork(nn.Module):
                 centered_screen[offset_h:offset_h+window_size[1] , offset_w:offset_w+window_size[0]] = 0
                 screen[:,:,3]=centered_screen
             screen = screen.astype('float32')
-            screen = cv.resize(screen,dsize=window_resize)
+            screen = cv.resize(screen,dsize=window_resize,interpolation=cv.INTER_AREA)
             if SHOW_STATE_SCREEN and frame_num==0:
                 showscreen=screen
                 #showscreen = cv.resize(screen,dsize=(200,200))
                 #showscreen = screen.astype('float32')
                 #showscreen = cv.cvtColor(showscreen, cv.COLOR_BGR2GRAY)
-                cv.imshow('frame',showscreen[:,:,:3])
+                cv.imshow('frame',cv.resize(showscreen[:,:,:3],(500,500),interpolation=0))
                 cv.waitKey(1)
             
             if GRAYSCALE:
@@ -273,7 +276,7 @@ class CriticNetwork(nn.Module):
             self.paper_conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4)*(1+PREV_FRAME_NUMBER), 16, 8, stride=4, padding=1)
         self.paper_conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)
         self.paper_flat = nn.Flatten()
-        self.paper_lin1 = nn.Linear(23328,256)
+        self.paper_lin1 = nn.Linear(28900,256)
         self.paper_lin2 = nn.Linear(256,1)
         
         if GRAYSCALE:
@@ -289,7 +292,7 @@ class CriticNetwork(nn.Module):
         self.conv4 = nn.Conv2d(8, 8, 2, stride=1, padding=1)
         self.flat = nn.Flatten()
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin0 = nn.Linear(10000,1500)
+        self.lin0 = nn.Linear(3200,1500)
         self.lin1 = nn.Linear(1500,1000)
         self.relu = nn.ReLU()
         self.lin2 = nn.Linear(1000,250)
@@ -302,10 +305,11 @@ class CriticNetwork(nn.Module):
         self.to(self.device)
     
     def forward(self,value):
-        value = self.paper_conv1(value)
-        value = self.relu(value)
-        value = self.paper_conv2(value)
-        value = self.relu(value)
+        self.pool1(value)
+        #value = self.paper_conv1(value)
+        #value = self.relu(value)
+        #value = self.paper_conv2(value)
+        #value = self.relu(value)
         value = self.flat(value)
         value = self.paper_lin1(value)
         value = self.relu(value)
