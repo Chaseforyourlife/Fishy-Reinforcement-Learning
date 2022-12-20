@@ -102,7 +102,7 @@ def main(trial=None,max_game_limit=MAX_GAME_LIMIT):
                 move = main_fishy.handle_keys()
             else:
                 main_fishy.handle_move(move)
-
+            #print(move)
             #handle main_fishy movement
             flipped,stopped = main_fishy.move()
             #check if fishy collided with any fish in the main_school

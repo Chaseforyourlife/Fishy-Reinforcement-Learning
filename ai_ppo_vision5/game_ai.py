@@ -222,6 +222,7 @@ class Agent:
         #print("Frame time is :", timeit.default_timer() - starttime)
         
         value=self.critic(state)
+       
         #print(value.shape)
         #print('VALUE',value)
         #print(dist.probs)
@@ -314,7 +315,8 @@ class Agent:
                 printt('actions',actions)
                 
                 dist = self.actor(states)
-                critic_value = self.critic(states)
+                critic_value = self.critic(states) 
+
                 critic_value = torch.squeeze(critic_value)
 
                 new_probs = dist.log_prob(actions)
