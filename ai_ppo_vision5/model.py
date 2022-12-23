@@ -52,7 +52,9 @@ class ActorNetwork(nn.Module):
         self.paper_lin1 = nn.Linear(3136,256)
         self.paper_lin2 = nn.Linear(256,SIZES[-1])
         
-
+        self.test_conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4) *(1+PREV_FRAME_NUMBER), 16, 5, stride=1, padding=2)
+        self.test_conv2 = nn.Conv2d(16, 32, 5, stride=1, padding=2)
+        self.test_pool1 = nn.MaxPool2d(5, 5)
 
         if GRAYSCALE:
             self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 3, stride=1, padding=1)
@@ -65,8 +67,8 @@ class ActorNetwork(nn.Module):
         self.pool3 = nn.MaxPool2d(2, 2)
         #self.conv4 = nn.Conv2d(8, 8, 2, stride=1, padding=1)
         self.flat = nn.Flatten()        #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin0 = nn.Linear(1875,100)
-        self.lin1 = nn.Linear(100,SIZES[-1])
+        self.lin0 = nn.Linear(800,400)
+        self.lin1 = nn.Linear(400,SIZES[-1])
         self.lin2 = nn.Linear(1000,250)
         self.relu = nn.ReLU()
         self.lin3 = nn.Linear(250, SIZES[-1])
@@ -141,6 +143,21 @@ class ActorNetwork(nn.Module):
             for i in range(len(instate)):
                 cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         
+        value = self.test_conv1(value)
+        if SHOW_CONV1:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        value = self.test_conv2(value)
+        if SHOW_CONV2:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
+        value = self.test_pool1(value)
+        if SHOW_POOL1:
+            instate = value.clone().to('cpu').detach().numpy()[0]
+            for i in range(len(instate)):
+                cv.imshow(f'screen{i}',cv.resize(instate[i],dsize=(SRN_SZE,SRN_SZE),interpolation=0))
         value = self.flat(value)
         value = self.lin0(value)
         value = self.relu(value)
@@ -276,6 +293,11 @@ class CriticNetwork(nn.Module):
         self.paper_lin1 = nn.Linear(28900,256)
         self.paper_lin2 = nn.Linear(256,1)
         
+
+        self.test_conv1 = nn.Conv2d((3 if not CENTER_AGENT else 4) *(1+PREV_FRAME_NUMBER), 16, 5, stride=1, padding=2)
+        self.test_conv2 = nn.Conv2d(16, 32, 5, stride=1, padding=2)
+        self.test_pool1 = nn.MaxPool2d(5, 5)
+
         if GRAYSCALE:
             self.conv1 = nn.Conv2d(1+PREV_FRAME_NUMBER, 16, 3, stride=1, padding=1)
         elif not GRAYSCALE:
@@ -288,8 +310,8 @@ class CriticNetwork(nn.Module):
         self.conv4 = nn.Conv2d(8, 8, 2, stride=1, padding=1)
         self.flat = nn.Flatten()
         #self.lin1 = nn.Linear(16*(1+PREV_FRAME_NUMBER),16)
-        self.lin0 = nn.Linear(1875,100)
-        self.lin1 = nn.Linear(100,1)
+        self.lin0 = nn.Linear(800,400)
+        self.lin1 = nn.Linear(400,1)
         self.relu = nn.ReLU()
         self.lin2 = nn.Linear(1000,250)
         self.lin3 = nn.Linear(250, 1)
@@ -322,7 +344,9 @@ class CriticNetwork(nn.Module):
         
         #value = self.pool3(value)
         #value = self.conv4(value)
-        
+        value = self.test_conv1(value)
+        value = self.test_conv2(value)
+        value = self.test_pool1(value)
         value = self.flat(value)
         value = self.lin0(value)
         value = self.relu(value)

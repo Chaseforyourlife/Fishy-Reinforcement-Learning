@@ -28,7 +28,7 @@ SHOW_STATE_SCREEN = True
 window_size = (550,400)
 #reshape, but maintain width ratio
 window_resize = (25,25)#(40,40)#(85,85)#(225,225)#(225,225*3)#(550,400*3)#(75,75*3)#(75,75)#(225,225)# (550,400) #(225,225)
-MAX_FISH = 1#8
+MAX_FISH = 8
 MAX_FISH_SPEED = 6 #6
 MIN_FISH_SPEED = 2 #2
 #MAX_FISH_SIZE = 0#150 #30 #150
@@ -54,7 +54,7 @@ NUM_EPOCHS=1 # try 10 and 5?
 BATCH_SIZE = 16#10000#15 is fastest
 TIMESTEPS_PER_ITERATION=500
 
-GAMMA = .975 #0.90 # must be less than 1, originally .99
+GAMMA = 0.99#.975 #0.90 # must be less than 1, originally .99
 
 REWARD_PROXIMITY=False
 REWARD_EAT=True
@@ -86,10 +86,10 @@ SHOW_POOL1 = False
 SHOW_CONV2 = False
 SHOW_POOL2 = False
 SHOW_CONV3 = False
-SHOW_POOL3 = True
+SHOW_POOL3 = False
 SHOW_CONV4 = False
 
-PREV_FRAME_NUMBER = 0
+PREV_FRAME_NUMBER = 1
 
 FRAME_SKIP = False
 
