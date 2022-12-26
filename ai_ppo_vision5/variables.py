@@ -28,7 +28,7 @@ SHOW_STATE_SCREEN = True
 window_size = (550,400)
 #reshape, but maintain width ratio
 window_resize = (25,25)#(40,40)#(85,85)#(225,225)#(225,225*3)#(550,400*3)#(75,75*3)#(75,75)#(225,225)# (550,400) #(225,225)
-MAX_FISH = 8
+MAX_FISH = 2
 MAX_FISH_SPEED = 6 #6
 MIN_FISH_SPEED = 2 #2
 #MAX_FISH_SIZE = 0#150 #30 #150
